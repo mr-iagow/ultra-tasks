@@ -161,6 +161,7 @@ $hesklang['results_page']='resultados por página';
 $hesklang['opened']='Aberto'; // The ticket has been OPENED
 $hesklang['closed']='Resolvido'; // Ticket has been RESOLVED
 $hesklang['ticket']='Chamado';
+$hesklang['message']='Relato';
 $hesklang['tickets']='Chamados';
 $hesklang['ticket_been']='Este chamado foi';
 $hesklang['view_ticket']='Ver chamado';
