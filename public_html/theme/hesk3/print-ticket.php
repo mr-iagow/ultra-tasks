@@ -40,7 +40,7 @@ if (!defined('IN_SCRIPT')) {
 </head>
 <body onload="window.print()">
     <div style="text-align: left;">
-        <img src="/logosinfo/infolink.png" alt="Logo da Empresa" style="max-width: 200px; height: auto;">
+        <img src="/logosinfo/infox2.PNG" alt="Logo da Empresa" style="max-width: 200px; height: auto;">
     </div>
 
 <?php foreach ($tickets as $ticket): ?>
