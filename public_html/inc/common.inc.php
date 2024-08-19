@@ -802,139 +802,44 @@ function hesk_cleanID($field='track', $in=false)
 
 function hesk_createID()
 {
-	global $hesk_settings, $hesklang, $hesk_error_buffer;
+    global $hesk_settings, $hesklang, $hesk_error_buffer;
 
-	/*** Generate tracking ID and make sure it's not a duplicate one ***/
+    /*** Generate sequential tracking ID with a minimum of 7 digits ***/
 
-	/* Ticket ID can be of these chars */
-	$useChars = 'AEUYBDGHJLMNPQRSTVWXZ123456789';
+    // Query the last inserted ID from the database
+    $res = hesk_dbQuery("SELECT MAX(CAST(trackid AS UNSIGNED)) AS last_id FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets`");
 
-    /* Set tracking ID to an empty string */
-	$trackingID = '';
-
-	/* Let's avoid duplicate ticket ID's, try up to 3 times */
-	for ($i=1;$i<=3;$i++)
+    if ($row = hesk_dbFetchAssoc($res))
     {
-	    /* Generate raw ID */
-	    $trackingID .= $useChars[mt_rand(0,29)];
-	    $trackingID .= $useChars[mt_rand(0,29)];
-	    $trackingID .= $useChars[mt_rand(0,29)];
-	    $trackingID .= $useChars[mt_rand(0,29)];
-	    $trackingID .= $useChars[mt_rand(0,29)];
-	    $trackingID .= $useChars[mt_rand(0,29)];
-	    $trackingID .= $useChars[mt_rand(0,29)];
-	    $trackingID .= $useChars[mt_rand(0,29)];
-	    $trackingID .= $useChars[mt_rand(0,29)];
-	    $trackingID .= $useChars[mt_rand(0,29)];
+        // If there's a previous ID, increment it by 1
+        $trackingID = $row['last_id'] + 1;
 
-		/* Format the ID to the correct shape and check wording */
-        $trackingID = hesk_formatID($trackingID);
-
-		/* Check for duplicate IDs */
-		$res = hesk_dbQuery("SELECT `id` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets` WHERE `trackid` = '".hesk_dbEscape($trackingID)."' LIMIT 1");
-
-		if (hesk_dbNumRows($res) == 0)
-		{
-        	/* Everything is OK, no duplicates found */
-			return $trackingID;
+        // Ensure the ID has at least 7 digits
+        if ($trackingID < 1000000) {
+            $trackingID = 1000000 + $trackingID;
         }
-
-        /* A duplicate ID has been found! Let's try again (up to 2 more) */
-        $trackingID = '';
+    }
+    else
+    {
+        // If no ID exists, start with a base number that has 7 digits
+        $trackingID = 1000000; // Starting number with 7 digits
     }
 
-    /* No valid tracking ID, try one more time with microtime() */
-	$trackingID  = $useChars[mt_rand(0,29)];
-	$trackingID .= $useChars[mt_rand(0,29)];
-	$trackingID .= $useChars[mt_rand(0,29)];
-	$trackingID .= $useChars[mt_rand(0,29)];
-	$trackingID .= $useChars[mt_rand(0,29)];
-	$trackingID .= substr(microtime(), -5);
+    // Check for duplicates just in case
+    $res = hesk_dbQuery("SELECT `id` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets` WHERE `trackid` = '".hesk_dbEscape($trackingID)."' LIMIT 1");
 
-	/* Format the ID to the correct shape and check wording */
-	$trackingID = hesk_formatID($trackingID);
-
-	$res = hesk_dbQuery("SELECT `id` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets` WHERE `trackid` = '".hesk_dbEscape($trackingID)."' LIMIT 1");
-
-	/* All failed, must be a server-side problem... */
-	if (hesk_dbNumRows($res) == 0)
-	{
-		return $trackingID;
+    if (hesk_dbNumRows($res) == 0)
+    {
+        // No duplicates, return the new ID
+        return $trackingID;
     }
 
+    // If somehow there's a duplicate, return false and log an error
     $hesk_error_buffer['etid'] = $hesklang['e_tid'];
-	return false;
+    return false;
 
 } // END hesk_createID()
 
-
-function hesk_formatID($id)
-{
-
-	$useChars = 'AEUYBDGHJLMNPQRSTVWXZ123456789';
-
-    $replace  = $useChars[mt_rand(0,29)];
-    $replace .= mt_rand(1,9);
-    $replace .= $useChars[mt_rand(0,29)];
-
-    /*
-    Remove 3 letter bad words from ID
-    Possiblitiy: 1:27,000
-    */
-	$remove = array(
-    'ASS',
-    'CUM',
-    'FAG',
-    'FUK',
-    'GAY',
-    'SEX',
-    'TIT',
-    'XXX',
-    );
-
-    $id = str_replace($remove,$replace,$id);
-
-    /*
-    Remove 4 letter bad words from ID
-    Possiblitiy: 1:810,000
-    */
-	$remove = array(
-	'ANAL',
-	'ANUS',
-	'BUTT',
-	'CAWK',
-	'CLIT',
-	'COCK',
-	'CRAP',
-	'CUNT',
-	'DICK',
-	'DYKE',
-	'FART',
-	'FUCK',
-	'JAPS',
-	'JERK',
-	'JIZZ',
-	'KNOB',
-	'PISS',
-	'POOP',
-	'SHIT',
-	'SLUT',
-	'SUCK',
-	'TURD',
-
-    // Also, remove words that are known to trigger mod_security
-	'WGET',
-    );
-
-	$replace .= mt_rand(1,9);
-    $id = str_replace($remove,$replace,$id);
-
-    /* Format the ID string into XXX-XXX-XXXX format for easier readability */
-    $id = $id[0].$id[1].$id[2].'-'.$id[3].$id[4].$id[5].'-'.$id[6].$id[7].$id[8].$id[9];
-
-    return $id;
-
-} // END hesk_formatID()
 
 
 function hesk_cleanBfAttempts()
