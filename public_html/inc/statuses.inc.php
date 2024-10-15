@@ -152,9 +152,12 @@ function hesk_get_status_checkboxes($selected = array())
             $has_row = true;
         }
 
+        // Verifica se o status é 6, para que venha desmarcado
+        $checked = ($k != 6 && isset($selected[$k])) ? 'checked' : '';
+
         echo '
         <div class="checkbox-custom">
-            <input type="checkbox" id="status_'.$k.'" name="s'.$k.'" value="1" '.(isset($selected[$k]) ? 'checked' : '').'>
+            <input type="checkbox" id="status_'.$k.'" name="s'.$k.'" value="1" '.$checked.'>
             <label for="status_'.$k.'">'.hesk_get_admin_ticket_status($k).'</label>
         </div>';
 
@@ -167,7 +170,8 @@ function hesk_get_status_checkboxes($selected = array())
     }
     if ($has_row) echo '</div>';
     echo '</div>';
-} // END hesk_get_status_select()
+}
+ // END hesk_get_status_select()
 
 
 function hesk_get_status_name($status)

@@ -193,11 +193,12 @@ $tmp = count($status);
 // Do we need to search by status?
 if ( $tmp < count($hesk_settings['statuses']) )
 {
-	// If no statuses selected, show default (all except RESOLVED)
+	// Aqui é feito o filtro na página principal para remover os status 3 Resolvido e o 6 Cancelado para não poluir a página principal do sistema
 	if ($tmp == 0)
 	{
 		$status = $hesk_settings['statuses'];
 		unset($status[3]);
+        unset($status[6]);
 	}
 
 	// Add to the SQL
