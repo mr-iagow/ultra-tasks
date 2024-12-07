@@ -739,6 +739,7 @@ function new_user()
     /* Categories and Features will be stored as a string */
     $myuser['categories'] = implode(',',$myuser['categories']);
     $myuser['features'] = implode(',',$myuser['features']);
+    $myuser['equipe_colaborador'] = hesk_input($_POST['equipe_colaborador']) ?? ''; // Capture the team field
 
     /* Check for duplicate usernames */
 	$result = hesk_dbQuery("SELECT * FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."users` WHERE `user` = '".hesk_dbEscape($myuser['user'])."' LIMIT 1");
@@ -754,57 +755,60 @@ function new_user()
 		$myuser['features'] = '';
     }
 
-	hesk_dbQuery("INSERT INTO `".hesk_dbEscape($hesk_settings['db_pfix'])."users` (
-	`user`,
-	`pass`,
-	`isadmin`,
-	`name`,
-	`email`,
-	`signature`,
-	`categories`,
-	`autoassign`,
-	`heskprivileges`,
-	`afterreply`,
-	`autostart`,
-	`autoreload`,
-	`notify_customer_new`,
-	`notify_customer_reply`,
-	`show_suggested`,
-	`notify_new_unassigned`,
-	`notify_overdue_unassigned`,
-	`notify_new_my`,
-	`notify_overdue_my`,
-	`notify_reply_unassigned`,
-	`notify_reply_my`,
-	`notify_assigned`,
-	`notify_pm`,
-	`notify_note`
-	) VALUES (
-	'".hesk_dbEscape($myuser['user'])."',
-	'".hesk_dbEscape($myuser['pass'])."',
-	'".intval($myuser['isadmin'])."',
-	'".hesk_dbEscape($myuser['name'])."',
-	'".hesk_dbEscape($myuser['email'])."',
-	'".hesk_dbEscape($myuser['signature'])."',
-	'".hesk_dbEscape($myuser['categories'])."',
-	'".intval($myuser['autoassign'])."',
-	'".hesk_dbEscape($myuser['features'])."',
-	'".($myuser['afterreply'])."' ,
-	'".($myuser['autostart'])."' ,
-	'".($myuser['autoreload'])."' ,
-	'".($myuser['notify_customer_new'])."' ,
-	'".($myuser['notify_customer_reply'])."' ,
-	'".($myuser['show_suggested'])."' ,
-	'".($myuser['notify_new_unassigned'])."' ,
-	'".($myuser['notify_overdue_unassigned'])."',
-	'".($myuser['notify_new_my'])."' ,
-	'".($myuser['notify_overdue_my'])."' ,
-	'".($myuser['notify_reply_unassigned'])."' ,
-	'".($myuser['notify_reply_my'])."' ,
-	'".($myuser['notify_assigned'])."' ,
-	'".($myuser['notify_pm'])."',
-	'".($myuser['notify_note'])."'
-	)" );
+    hesk_dbQuery("INSERT INTO `".hesk_dbEscape($hesk_settings['db_pfix'])."users` (
+        `user`,
+        `pass`,
+        `isadmin`,
+        `name`,
+        `email`,
+        `signature`,
+        `categories`,
+        `autoassign`,
+        `heskprivileges`,
+        `afterreply`,
+        `autostart`,
+        `autoreload`,
+        `notify_customer_new`,
+        `notify_customer_reply`,
+        `show_suggested`,
+        `notify_new_unassigned`,
+        `notify_overdue_unassigned`,
+        `notify_new_my`,
+        `notify_overdue_my`,
+        `notify_reply_unassigned`,
+        `notify_reply_my`,
+        `notify_assigned`,
+        `notify_pm`,
+        `notify_note`,
+        `equipe_colaborador`
+    ) VALUES (
+        '".hesk_dbEscape($myuser['user'])."',
+        '".hesk_dbEscape($myuser['pass'])."',
+        '".intval($myuser['isadmin'])."',
+        '".hesk_dbEscape($myuser['name'])."',
+        '".hesk_dbEscape($myuser['email'])."',
+        '".hesk_dbEscape($myuser['signature'])."',
+        '".hesk_dbEscape($myuser['categories'])."',
+        '".intval($myuser['autoassign'])."',
+        '".hesk_dbEscape($myuser['features'])."',
+        '".($myuser['afterreply'])."',
+        '".($myuser['autostart'])."',
+        '".($myuser['autoreload'])."',
+        '".($myuser['notify_customer_new'])."',
+        '".($myuser['notify_customer_reply'])."',
+        '".($myuser['show_suggested'])."',
+        '".($myuser['notify_new_unassigned'])."',
+        '".($myuser['notify_overdue_unassigned'])."',
+        '".($myuser['notify_new_my'])."',
+        '".($myuser['notify_overdue_my'])."',
+        '".($myuser['notify_reply_unassigned'])."',
+        '".($myuser['notify_reply_my'])."',
+        '".($myuser['notify_assigned'])."',
+        '".($myuser['notify_pm'])."',
+        '".($myuser['notify_note'])."',
+        '".hesk_dbEscape($myuser['equipe_colaborador'])."'
+    )");
+    
 
     $_SESSION['seluser'] = hesk_dbInsertID();
 
@@ -901,7 +905,8 @@ function update_user()
 	`notify_reply_my`='".($myuser['notify_reply_my'])."' ,
 	`notify_assigned`='".($myuser['notify_assigned'])."' ,
 	`notify_pm`='".($myuser['notify_pm'])."',
-	`notify_note`='".($myuser['notify_note'])."'
+	`notify_note`='".($myuser['notify_note'])."',
+    `equipe_colaborador`='".hesk_dbEscape($myuser['equipe_colaborador'])."'
     WHERE `id`='".intval($myuser['id'])."'");
 
     unset($_SESSION['save_userdata']);
@@ -944,6 +949,14 @@ function hesk_validateUserInfo($pass_required = 1, $redirect_to = './manage_user
     } else {
         $hesk_error_buffer .= '<li>' . $hesklang['enter_username'] . '</li>';
         $errors[] = 'user';
+    }
+
+      // Validação do campo equipe_colaborador
+      if (hesk_input(hesk_POST('equipe_colaborador'))) {
+        $myuser['equipe_colaborador'] = hesk_input(hesk_POST('equipe_colaborador'));
+    } else {
+        $hesk_error_buffer .= '<li>' . $hesklang['enter_team_name'] . '</li>';
+        $errors[] = 'equipe_colaborador';
     }
 
 	$myuser['isadmin']	  = empty($_POST['isadmin']) ? 0 : 1;

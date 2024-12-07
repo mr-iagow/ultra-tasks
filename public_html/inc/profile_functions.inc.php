@@ -62,6 +62,13 @@ function hesk_profile_tab($session_array='new',$is_profile_page=true)
                 <input type="text" class="form-control <?php echo in_array('email', $errors) ? 'isError' : ''; ?>" name="email" maxlength="255" id="prof_user"
                        value="<?php echo $_SESSION[$session_array]['email']; ?>">
             </div>
+
+            <div class="form-group">
+                <label for="equipe_colaborador"><?php echo $hesklang['equipe_colaborador']; ?></label>
+                <input type="text" class="form-control <?php echo in_array('equipe_colaborador', $errors) ? 'isError' : ''; ?>" name="equipe_colaborador" maxlength="255" id="equipe_colaborador"
+                    value="<?php echo isset($_SESSION[$session_array]['equipe_colaborador']) ? htmlspecialchars($_SESSION[$session_array]['equipe_colaborador']) : ''; ?>">
+            </div>
+
             <?php
             if ( ! $is_profile_page || $_SESSION['isadmin'])
             {
