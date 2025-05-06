@@ -1086,79 +1086,107 @@ exit();
 
 function print_select_category($number_of_categories)
 {
-	global $hesk_settings, $hesklang;
+    global $hesk_settings, $hesklang;
 
-	// A categoy needs to be selected
-	if (isset($_GET['category']) && empty($_GET['category']))
-	{
-		hesk_process_messages($hesklang['sel_app_cat'],'NOREDIRECT','NOTICE');
-	}
-
-    /* This will handle error, success and notice messages */
+    if (isset($_GET['category']) && $_GET['category'] === '') {
+        hesk_process_messages($hesklang['sel_app_cat'], 'NOREDIRECT', 'NOTICE');
+    }
     hesk_handle_messages();
     ?>
     <div class="main__content categories">
-        <?php
-        // Print a select box if number of categories is large
-        if ($number_of_categories > $hesk_settings['cat_show_select']) {
-            ?>
-            <div class="table-wrap">
-                <h2 class="select__title-alt"><?php echo $hesklang['select_category_staff']; ?></h2>
-                <form action="new_ticket.php" method="get" class="form">
-                    <select class="form-control" name="category" id="select_category">
-                        <?php
-                        if ($hesk_settings['select_cat'])
-                        {
-                            echo '<option value="">'.$hesklang['select'].'</option>';
-                        }
-                        foreach ($hesk_settings['categories'] as $k=>$v)
-                        {
-                            echo '<option value="'.$k.'">'.$v['name'].'</option>';
-                        }
-                        ?>
-                    </select>
-                    <button style="margin-top: 10px" type="submit" class="btn btn-full"><?php echo $hesklang['c2c']; ?></button>
-                </form>
-                <script>
-                    $(document).ready(function() {
-                        $('#select_category').selectize();
-                    });
-                </script>
-            </div>
-            <?php
-        }
-        // Otherwise print quick links
-        else
-        {
-            ?>
-            <h2 class="select__title"><?php echo $hesklang['select_category_staff']; ?></h2>
-            <div class="nav">
-                <?php foreach ($hesk_settings['categories'] as $k => $v): ?>
-                <a href="new_ticket.php?a=add&amp;category=<?php echo $k; ?>" class="navlink <?php if ($number_of_categories > 8) echo "navlink-condensed"; ?>">
-                    <div class="icon-in-circle">
-                        <svg class="icon icon-chevron-right">
-                            <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-chevron-right"></use>
-                        </svg>
-                    </div>
-                    <div>
-                        <h5 class="navlink__title"><!--[if IE]> &raquo; <![endif]--><?php echo $v['name']; ?></h5>
-                    </div>
-                </a>
-                <?php endforeach; ?>
-            </div>
-            <?php
-        }
-        ?>
+      <div class="table-wrap">
+        <h2 class="select__title-alt"><?php echo $hesklang['select_category_staff']; ?></h2>
+
+        <form action="new_ticket.php" method="get" class="form">
+          <!-- dropdown custom -->
+          <div style="position:relative; width:100%;">
+            <input
+              type="text"
+              id="category_search"
+              placeholder="<?php echo $hesklang['select']; ?>…"
+              autocomplete="off"
+              style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px"
+            />
+            <input type="hidden" name="category" id="category">
+
+            <ul id="category_list"
+                style="display:none;
+                       position:absolute;
+                       top:100%; left:0; right:0;
+                       max-height:300px; overflow-y:auto;
+                       border:1px solid #ccc;
+                       border-top:none;
+                       background:#fff;
+                       margin:0; padding:0;
+                       list-style:none;
+                       z-index:1000">
+              <?php foreach ($hesk_settings['categories'] as $k => $v): ?>
+                <li data-id="<?php echo $k?>"
+                    style="padding:8px; cursor:pointer;
+                           border-top:1px solid #eee">
+                  <?php echo htmlspecialchars($v['name'], ENT_QUOTES)?>
+                </li>
+              <?php endforeach ?>
+            </ul>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-full"
+            style="margin-top:10px"
+          ><?php echo $hesklang['c2c']?></button>
+        </form>
+      </div>
     </div>
+
+    <script>
+    (function(){
+      var inp   = document.getElementById('category_search');
+      var hid   = document.getElementById('category');
+      var list  = document.getElementById('category_list');
+      var items = list.getElementsByTagName('li');
+
+      function show()  { list.style.display = 'block'; }
+      function hide()  { list.style.display = 'none'; }
+      function filter(){
+        var term = inp.value.toLowerCase();
+        Array.prototype.forEach.call(items, function(li){
+          li.style.display = li.textContent.toLowerCase().indexOf(term) > -1
+                             ? 'block' : 'none';
+        });
+      }
+
+      inp.addEventListener('focus',  show);
+      inp.addEventListener('input',  function(){
+        filter();
+        show();
+      });
+
+      list.addEventListener('click', function(e){
+        if (e.target.tagName === 'LI') {
+            // remove espaços antes/depois do texto
+            var txt = e.target.textContent.trim();
+            inp.value = txt;
+            hid.value = e.target.dataset.id;
+            hide();
+        }
+        });
+
+
+      document.addEventListener('click', function(e){
+        if (!inp.contains(e.target) && !list.contains(e.target)) {
+          hide();
+        }
+      });
+    })();
+    </script>
     <?php
+    exit();
+}
 
-	hesk_cleanSessionVars('iserror');
-	hesk_cleanSessionVars('isnotice');
-    hesk_cleanSessionVars('as_priority');
 
-	require_once(HESK_PATH . 'inc/footer.inc.php');
-	exit();
-} // END print_select_category()
+
+
 
 
 function hesk_new_ticket_reset_data()
