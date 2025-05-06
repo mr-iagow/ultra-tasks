@@ -886,6 +886,7 @@ $hesklang['gbou']='Este chamados estão <b>não atribuídos</b>:';
 $hesklang['gbom']='Chamados atribuídos a <b>mim</b>:';
 $hesklang['gboo']='Chamados atribuídos a <b>%s</b>:';
 $hesklang['select']=' - - Clique para selecionar - - ';
+$hesklang['selecionarcategoria']=' - - Clique ou digite a categoria desejada - - ';
 $hesklang['chngstatus']='Alterar status para';
 $hesklang['perat']='%s de todos os chamados'; // Will change to "23% of all tickets"
 $hesklang['viewart']='Ver este artigo';

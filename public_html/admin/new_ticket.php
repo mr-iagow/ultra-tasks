@@ -1103,7 +1103,7 @@ function print_select_category($number_of_categories)
             <input
               type="text"
               id="category_search"
-              placeholder="<?php echo $hesklang['select']; ?>…"
+              placeholder="<?php echo $hesklang['selecionarcategoria']; ?>…"
               autocomplete="off"
               style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px"
             />
