@@ -65,7 +65,7 @@ if (!hesk_SESSION(array('new_cf','errors'))) {
 }
 
 // Did we reach the custom fields limit?
-if ($hesk_settings['num_custom_fields'] >= 50 && $action !== 'edit_cf')
+if ($hesk_settings['num_custom_fields'] >= 50000 && $action !== 'edit_cf')
 {
     hesk_show_info($hesklang['cf_limit']);
 }
