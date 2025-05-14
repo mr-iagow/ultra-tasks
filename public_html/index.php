@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * This file is part of HESK - PHP Help Desk Software.
+ * This file is part of HESK - PHP Help Desk Software. Rafael Lima Godson.
  *
  * (c) Copyright Klemen Stirn. All rights reserved.
  * https://www.hesk.com
