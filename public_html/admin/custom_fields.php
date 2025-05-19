@@ -65,7 +65,7 @@ if (!hesk_SESSION(array('new_cf','errors'))) {
 }
 
 // Did we reach the custom fields limit?
-if ($hesk_settings['num_custom_fields'] >= 50000 && $action !== 'edit_cf')
+if ($hesk_settings['num_custom_fields'] >= 50000000 && $action !== 'edit_cf')
 {
     hesk_show_info($hesklang['cf_limit']);
 }
@@ -89,7 +89,7 @@ $hesk_settings['datepicker']['#dmax']['position'] = 'left bottom';
                 </div>
             </div>
         </h2>
-        <?php if ($hesk_settings['num_custom_fields'] < 50 && $action !== 'edit_cf'): ?>
+        <?php if ($hesk_settings['num_custom_fields'] < 5000000 && $action !== 'edit_cf'): ?>
         <div class="btn btn--blue-border" ripple="ripple" data-action="create-custom-field">
             <?php echo $hesklang['new_cf']; ?>
         </div>
