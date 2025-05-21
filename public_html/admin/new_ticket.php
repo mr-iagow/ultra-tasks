@@ -235,7 +235,26 @@ if ( ! isset($_SESSION['as_status']))
         <?php
         if ( ! isset($_SESSION['HESK_ERROR']))
         {
-            hesk_show_info($hesklang['nti3'], ' ', false);
+            // hesk_show_info($v['value']['default_value'], ' ', false);
+            if (strlen($k_value) != 0 || isset($_SESSION["as_$k"]))
+                {
+                    $v['value']['default_value'] = $k_value;
+                }
+
+                $cls = in_array($k,$_SESSION['iserror']) ? 'isError' : '';
+
+                    echo '<div class="main__content notice-flash">
+                            <div class="notification blue">
+                                '.$v['value']['default_value'].'
+                            </div>
+                        </div>';
+        ?>
+        <!-- <div class="main__content notice-flash">
+            <div class="notification blue">
+                <?php echo $v['value']['default_value']; ?>
+            </div>
+        </div> -->
+        <?php
         }
 
         /* This will handle error, success and notice messages */
