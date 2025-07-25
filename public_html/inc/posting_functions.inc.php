@@ -43,11 +43,11 @@ function hesk_newTicket($ticket)
         $ticket['status'] = 0;
     }
 
-	// Prepare SQL for custom fields
+	// Prepare SQL for custom fields - Sempre que criar novas categorias que passem de 126, necessário ajustar esse campo
 	$custom_where = '';
 	$custom_what  = '';
 
-	for ($i=1; $i<=50; $i++)
+	for ($i=1; $i<=126; $i++)
 	{
 		$custom_where .= ", `custom{$i}`";
 		$custom_what  .= ", '" . (isset($ticket['custom'.$i]) ? hesk_dbEscape($ticket['custom'.$i]) : '') . "'";
