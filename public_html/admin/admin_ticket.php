@@ -1756,23 +1756,15 @@ function hesk_getAdminButtons($isReply=0,$white=1)
         $tmp = $isReply ? '&amp;reply='.$reply['id'] : '';
         if ($isReply) {
             $buttons['more']['edit'] = '
-        <a id="editreply'.$reply['id'].'" href="edit_post.php?track='.$trackingID.$tmp.'" title="'.$hesklang['btn_edit'].'" style="margin-right: 15px">
-            <svg class="icon icon-edit-ticket">
-                <use xlink:href="'. HESK_PATH . 'img/sprite.svg#icon-edit-ticket"></use>
-            </svg>
-            '.$hesklang['btn_edit'].'
-        </a>';
-        } else {
-            $buttons[] = '
-        <a id="editticket" href="edit_post.php?track='.$trackingID.$tmp.'" title="'.$hesklang['btn_edit'].'">
-            <svg class="icon icon-edit-ticket">
-                <use xlink:href="'. HESK_PATH . 'img/sprite.svg#icon-edit-ticket"></use>
-            </svg>
-            '.$hesklang['btn_edit'].'
-        </a>';
+            <a id="editreply'.$reply['id'].'" href="edit_post.php?track='.$trackingID.$tmp.'" title="'.$hesklang['btn_edit'].'" style="margin-right: 15px">
+                <svg class="icon icon-edit-ticket">
+                    <use xlink:href="'. HESK_PATH . 'img/sprite.svg#icon-edit-ticket"></use>
+                </svg>
+                '.$hesklang['btn_edit'].'
+            </a>';
         }
-
     }
+
 
 
     if (!$isReply) {
