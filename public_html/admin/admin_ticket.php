@@ -1201,12 +1201,15 @@ $options = array(
                     <?php
                 }
                 ?>
+                <!-- REMOÇÃO DO BOTÃO DE ADICIONAR OBSERVAÇÕES AO TICKET CONFORME SOLICITADO NO PROTOCOLO 3468474 
                 <button class="btn btn--blue-border" type="button" onclick="hesk_toggleLayerDisplay('notesDiv')">
                     <svg class="icon icon-note">
                         <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-note"></use>
                     </svg>&nbsp;&nbsp;
                     <?php echo $hesklang['addnote']; ?>
                 </button>
+                -->
+
                 <div id="notesDiv" style="display:<?php echo isset($_SESSION['note_message']) ? 'block' : 'none'; ?>; margin-top: 20px">
                     <form id="notesform" method="post" action="admin_ticket.php" class="form" enctype="multipart/form-data">
                         <i><?php echo $hesklang['nhid']; ?></i><br>
