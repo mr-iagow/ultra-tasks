@@ -122,6 +122,7 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                 </div>
                 <form class="form form-submit-ticket ticket-create <?php echo count($_SESSION['iserror']) ? 'invalid' : ''; ?>" method="post" action="submit_ticket.php?submit=1" name="form1" id="form1" enctype="multipart/form-data">
                     <section class="form-groups">
+                        <?php if ($categoryId != 99): ?>
                         <div class="form-group error">
                             <label class="label required"><?php echo $hesklang['name']; ?>:</label>
                             <input type="text" name="name" class="form-control <?php if (in_array('name',$_SESSION['iserror'])) {echo 'isError';} ?>" maxlength="50" value="<?php if (isset($_SESSION['c_name'])) {echo stripslashes(hesk_input($_SESSION['c_name']));} ?>" required>
@@ -145,6 +146,7 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                                        <?php if ($hesk_settings['require_email']) { ?>required<?php } ?>>
                             </div>
                         <?php endif; ?>
+                        <?php endif; // fim categoria 99 ?>
                     </section>
                     <?php if ($hesk_settings['cust_urgency']): ?>
                         <section class="param">

@@ -142,35 +142,46 @@ if ($hesk_settings['secimg_use'] && ! isset($_SESSION['img_verified']))
 	}
 }
 
-$tmpvar['name']	 = hesk_input( hesk_POST('name') ) or $hesk_error_buffer['name']=$hesklang['enter_your_name'];
+// --- MODIFICAÇÃO: Categoria 99 = anônimo, sem nome/email obrigatórios ---
+$_post_category = intval(hesk_POST('category'));
 
-$email_available = true;
+if ($_post_category == 99) {
+    $tmpvar['name'] = 'Anônimo';
+    $tmpvar['email'] = '';
+    $email_available = false;
+    $hesk_settings['confirm_email'] = 0;
+} else {
+    $tmpvar['name'] = hesk_input( hesk_POST('name') ) or $hesk_error_buffer['name']=$hesklang['enter_your_name'];
 
-if ($hesk_settings['require_email'])
-{
-    $tmpvar['email'] = hesk_validateEmail( hesk_POST('email'), 'ERR', 0) or $hesk_error_buffer['email']=$hesklang['enter_valid_email'];
-}
-else
-{
-    $tmpvar['email'] = hesk_validateEmail( hesk_POST('email'), 'ERR', 0);
+    $email_available = true;
 
-    // Not required, but must be valid if it is entered
-    if ($tmpvar['email'] == '')
+    if ($hesk_settings['require_email'])
     {
-        $email_available = false;
+        $tmpvar['email'] = hesk_validateEmail( hesk_POST('email'), 'ERR', 0) or $hesk_error_buffer['email']=$hesklang['enter_valid_email'];
+    }
+    else
+    {
+        $tmpvar['email'] = hesk_validateEmail( hesk_POST('email'), 'ERR', 0);
 
-        if (strlen(hesk_POST('email')))
+        // Not required, but must be valid if it is entered
+        if ($tmpvar['email'] == '')
         {
-            $hesk_error_buffer['email'] = $hesklang['not_valid_email'];
-        }
+            $email_available = false;
 
-        // No need to confirm the email
-        $hesk_settings['confirm_email'] = 0;
-        $_POST['email2'] = '';
-        $_SESSION['c_email'] = '';
-        $_SESSION['c_email2'] = '';
+            if (strlen(hesk_POST('email')))
+            {
+                $hesk_error_buffer['email'] = $hesklang['not_valid_email'];
+            }
+
+            // No need to confirm the email
+            $hesk_settings['confirm_email'] = 0;
+            $_POST['email2'] = '';
+            $_SESSION['c_email'] = '';
+            $_SESSION['c_email2'] = '';
+        }
     }
 }
+// --- FIM DA MODIFICAÇÃO ---
 
 if ($hesk_settings['confirm_email'])
 {
