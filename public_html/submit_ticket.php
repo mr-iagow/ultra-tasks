@@ -142,11 +142,21 @@ if ($hesk_settings['secimg_use'] && ! isset($_SESSION['img_verified']))
 	}
 }
 
-// --- MODIFICAÇÃO: Categoria 99 = anônimo, sem nome/email obrigatórios ---
+// --- MODIFICAÇÃO: Categoria 99 = anônimo, com opção de identificação ---
 $_post_category = intval(hesk_POST('category'));
 
 if ($_post_category == 99) {
-    $tmpvar['name'] = 'Anônimo';
+    $identificar = hesk_POST('identificar');
+    $_SESSION['c_identificar'] = $identificar;
+
+    if ($identificar === 'sim') {
+        // custom52 = Nome completo preenchido pelo usuário
+        $cat99_nome = trim(hesk_input(hesk_POST('custom52')));
+        $tmpvar['name'] = $cat99_nome !== '' ? $cat99_nome : 'Anônimo';
+    } else {
+        $tmpvar['name'] = 'Anônimo';
+    }
+
     $tmpvar['email'] = '';
     $email_available = false;
     $hesk_settings['confirm_email'] = 0;

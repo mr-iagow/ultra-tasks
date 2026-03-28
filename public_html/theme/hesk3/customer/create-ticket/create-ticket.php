@@ -146,6 +146,68 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                                        <?php if ($hesk_settings['require_email']) { ?>required<?php } ?>>
                             </div>
                         <?php endif; ?>
+                        <?php else: // categoria 99 - toggle de identificação ?>
+
+                        <!-- Toggle: Deseja se identificar? -->
+                        <div class="form-group" style="margin-bottom: 16px;">
+                            <label class="label" style="font-weight: 600; margin-bottom: 8px; display: block;">Deseja se identificar?</label>
+                            <div style="display: flex; gap: 12px;">
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 15px;">
+                                    <input type="radio" name="identificar" id="identificar_sim" value="sim" style="width: 18px; height: 18px; cursor: pointer;">
+                                    Sim
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 15px;">
+                                    <input type="radio" name="identificar" id="identificar_nao" value="nao" checked style="width: 18px; height: 18px; cursor: pointer;">
+                                    Não
+                                </label>
+                            </div>
+                        </div>
+
+                        <script>
+                        (function() {
+                            function getFieldWrapper(fieldName) {
+                                var input = document.querySelector('[name="' + fieldName + '"]');
+                                if (!input) return null;
+                                var el = input;
+                                for (var i = 0; i < 5; i++) {
+                                    if (!el.parentElement) break;
+                                    el = el.parentElement;
+                                    if (el.classList && el.classList.contains('form-group')) return el;
+                                }
+                                return input.parentElement;
+                            }
+
+                            function reordenarCampos() {
+                                // Garante ordem: Nome (custom52) antes de Telefone (custom3)
+                                var wrapperNome     = getFieldWrapper('custom52');
+                                var wrapperTelefone = getFieldWrapper('custom3');
+                                if (wrapperNome && wrapperTelefone && wrapperTelefone.parentElement) {
+                                    wrapperTelefone.parentElement.insertBefore(wrapperNome, wrapperTelefone);
+                                }
+                            }
+
+                            function toggleIdentificacao() {
+                                var sim = document.getElementById('identificar_sim').checked;
+                                var camposCustom = ['custom3', 'custom52'];
+                                camposCustom.forEach(function(name) {
+                                    var wrapper = getFieldWrapper(name);
+                                    if (wrapper) wrapper.style.display = sim ? '' : 'none';
+                                });
+                            }
+
+                            document.getElementById('identificar_sim').addEventListener('change', toggleIdentificacao);
+                            document.getElementById('identificar_nao').addEventListener('change', toggleIdentificacao);
+
+                            document.addEventListener('DOMContentLoaded', function() {
+                                reordenarCampos();
+                                toggleIdentificacao();
+                            });
+
+                            toggleIdentificacao();
+                        })();
+                        </script>
+
+
                         <?php endif; // fim categoria 99 ?>
                     </section>
                     <?php if ($hesk_settings['cust_urgency']): ?>
