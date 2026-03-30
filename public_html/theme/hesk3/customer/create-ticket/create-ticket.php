@@ -188,10 +188,17 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
 
                             function toggleIdentificacao() {
                                 var sim = document.getElementById('identificar_sim').checked;
-                                var camposCustom = ['custom3', 'custom52'];
-                                camposCustom.forEach(function(name) {
-                                    var wrapper = getFieldWrapper(name);
-                                    if (wrapper) wrapper.style.display = sim ? '' : 'none';
+                                var camposCustom = ['custom52', 'custom3', 'custom64'];
+                                camposCustom.forEach(function(fieldName) {
+                                    var wrapper = getFieldWrapper(fieldName);
+                                    if (wrapper) {
+                                        wrapper.style.display = sim ? '' : 'none';
+                                        if (!sim) {
+                                            // Limpa os valores ao marcar Não
+                                            var inputs = wrapper.querySelectorAll('input, textarea, select');
+                                            inputs.forEach(function(input) { input.value = ''; });
+                                        }
+                                    }
                                 });
                             }
 

@@ -70,6 +70,10 @@ if (isset($_SESSION['already_submitted']))
 // Connect to database
 hesk_dbConnect();
 
+error_log("HESK DEBUG - already_submitted: " . (isset($_SESSION['already_submitted']) ? 'SIM' : 'NAO'));
+error_log("HESK DEBUG - identificar: " . hesk_POST('identificar'));
+error_log("HESK DEBUG - category: " . hesk_POST('category'));
+
 $hesk_error_buffer = array();
 
 // Check anti-SPAM question
@@ -155,6 +159,10 @@ if ($_post_category == 99) {
         $tmpvar['name'] = $cat99_nome !== '' ? $cat99_nome : 'Anônimo';
     } else {
         $tmpvar['name'] = 'Anônimo';
+        // Limpa campos de identificação para não disparar validação dos custom fields
+        $_POST['custom52'] = '';
+        $_POST['custom3']  = '';
+        $_POST['custom64'] = '';
     }
 
     $tmpvar['email'] = '';
