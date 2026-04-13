@@ -193,7 +193,18 @@ foreach ($hesk_settings['custom_fields'] as $k=>$v)
 	            }
                 else
                 {
-                	$tmpvar[$k] = $date->getTimestamp();
+                    // Valida dias de pagamento permitidos (Seg=1, Qua=3, Sex=5)
+                    $payment_allowed_weekdays = [1, 3, 5];
+                    $today_midnight = new DateTime('today midnight', new DateTimeZone('UTC'));
+                    $submitted_weekday = (int)$date->format('w');
+
+                    if ($date < $today_midnight) {
+                        $hesk_error_buffer[$k] = $hesklang['invalid_due_date'];
+                    } elseif (!in_array($submitted_weekday, $payment_allowed_weekdays)) {
+                        $hesk_error_buffer[$k] = $hesklang['invalid_due_date'];
+                    } else {
+                        $tmpvar[$k] = $date->getTimestamp();
+                    }
                 }
 			}
             else
@@ -254,6 +265,17 @@ if (hesk_checkPermission('can_due_date',0)) {
         $date = hesk_datepicker_get_date($tmpvar['due_date']);
         if ($date === false) {
             $hesk_error_buffer['due_date'] = $hesklang['invalid_due_date'];
+        } else {
+            // Dias de pagamento permitidos: 1=Seg, 3=Qua, 5=Sex
+            $payment_allowed_weekdays = [1, 3, 5];
+            $today_midnight = new DateTime('today midnight');
+            $submitted_day = (int)$date->format('w');
+
+            if ($date < $today_midnight) {
+                $hesk_error_buffer['due_date'] = $hesklang['invalid_due_date'];
+            } elseif (!in_array($submitted_day, $payment_allowed_weekdays)) {
+                $hesk_error_buffer['due_date'] = $hesklang['invalid_due_date'];
+            }
         }
     }
 } else {

@@ -87,11 +87,33 @@ if (isset($hesk_settings['datepicker'])):
         const myDP = {};
         <?php
         foreach ($hesk_settings['datepicker'] as $selector => $data) {
-            echo "
-                myDP['{$selector}'] = $('{$selector}').datepicker(".((isset($data['position']) && is_string($data['position'])) ? "{position: '{$data['position']}'}" : "").");
-            ";
+            $opts = [];
+
+            if (isset($data['position']) && is_string($data['position'])) {
+                $opts[] = "position: '{$data['position']}'";
+            }
+
+            if (!empty($data['min_date_tomorrow'])) {
+                $opts[] = "minDate: new Date(new Date().setDate(new Date().getDate() + 1))";
+            }
+
+            if (!empty($data['payment_days']) && is_array($data['payment_days'])) {
+                $allowed_js = json_encode(array_values($data['payment_days']));
+                $opts[] = "onRenderCell: function(date, cellType) {
+                    if (cellType === 'day') {
+                        var allowedDays = {$allowed_js};
+                        if (allowedDays.indexOf(date.getDay()) === -1) {
+                            return { disabled: true, classes: 'payment-day-disabled' };
+                        }
+                    }
+                }";
+            }
+
+            $opts_str = !empty($opts) ? '{' . implode(', ', $opts) . '}' : '';
+            echo "myDP['{$selector}'] = $('{$selector}').datepicker({$opts_str});";
+
             if (isset($data['timestamp']) && ($ts = intval($data['timestamp']))) {
-                if ( ! empty($hesk_settings['datepicker'][$selector]['fromDB'])) {
+                if (!empty($hesk_settings['datepicker'][$selector]['fromDB'])) {
                     echo "myDP['{$selector}'].data('datepicker').selectDate(convertDateToUTC(new Date({$ts} * 1000)));";
                 } else {
                     echo "myDP['{$selector}'].data('datepicker').selectDate(new Date({$ts} * 1000));";

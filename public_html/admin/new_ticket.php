@@ -43,6 +43,23 @@ if ($hesk_settings['staff_ticket_formatting'] == 2) {
 
 $hesk_settings['datepicker'] = array();
 
+// ============================================================
+// REGRAS DE PRAZO DE PAGAMENTO — configuração modular
+// Dias da semana: 0=Dom, 1=Seg, 2=Ter, 3=Qua, 4=Qui, 5=Sex, 6=Sáb
+// Para alterar os dias permitidos, edite os dois arrays abaixo.
+// ============================================================
+$payment_date_rules = [
+    0 => 3,  // Domingo   → Quarta
+    1 => 3,  // Segunda   → Quarta
+    2 => 5,  // Terça     → Sexta
+    3 => 5,  // Quarta    → Sexta
+    4 => 1,  // Quinta    → Segunda
+    5 => 3,  // Sexta     → Quarta (próxima semana)
+    6 => 3,  // Sábado    → Quarta
+];
+$payment_allowed_weekdays = [1, 3, 5]; // Segunda, Quarta, Sexta
+// ============================================================
+
 // Pre-populate fields
 
 // First, reset data if any query string value is present
@@ -486,7 +503,20 @@ if ( ! isset($_SESSION['as_status']))
                             $cls = in_array($k,$_SESSION['iserror']) ? 'isErrorStr' : '';
                             if (is_string($k_value) && ($dd = hesk_datepicker_get_date($k_value))) {
                                 $hesk_settings['datepicker']['#'.$k]['timestamp'] = $dd->getTimestamp();
+                            } elseif (empty($k_value)) {
+                                // Auto-fill com próximo dia de pagamento
+                                $today = new DateTime('today midnight');
+                                $today_weekday = (int)$today->format('w');
+                                $target_weekday = isset($payment_date_rules[$today_weekday]) ? $payment_date_rules[$today_weekday] : 3;
+                                $days_ahead = ($target_weekday - $today_weekday + 7) % 7;
+                                if ($days_ahead === 0) { $days_ahead = 7; }
+                                $pdate = clone $today;
+                                $pdate->modify("+{$days_ahead} days");
+                                $hesk_settings['datepicker']['#'.$k]['timestamp'] = $pdate->getTimestamp();
+                                $k_value = hesk_datepicker_format_date($pdate->getTimestamp());
                             }
+                            $hesk_settings['datepicker']['#'.$k]['payment_days']     = $payment_allowed_weekdays;
+                            $hesk_settings['datepicker']['#'.$k]['min_date_tomorrow'] = true;
                             echo '
                                 <section class="param calendar">
                                     <label class="'.$cls.'">'.$v['name:'].' '.$v['req'].'</label>
@@ -498,7 +528,7 @@ if ( ! isset($_SESSION['as_status']))
                                         </button>
                                         <input name="'. $k .'" id="'. $k .'"
                                                value="'. $k_value .'"
-                                               type="text" class="datepicker">
+                                               type="text" class="datepicker" readonly>
                                     </div>
                                     <div class="calendar--value" '. ($k_value ? 'style="display: block"' : '') . '>
                                         <span class="'. ($cls && ! empty($k_value) ? $cls : '') .'"><i>'. $k_value .'</i></span>
@@ -854,7 +884,20 @@ if ( ! isset($_SESSION['as_status']))
                             $cls = in_array($k,$_SESSION['iserror']) ? 'isErrorStr' : '';
                             if (is_string($k_value) && ($dd = hesk_datepicker_get_date($k_value))) {
                                 $hesk_settings['datepicker']['#'.$k]['timestamp'] = $dd->getTimestamp();
+                            } elseif (empty($k_value)) {
+                                // Auto-fill com próximo dia de pagamento
+                                $today = new DateTime('today midnight');
+                                $today_weekday = (int)$today->format('w');
+                                $target_weekday = isset($payment_date_rules[$today_weekday]) ? $payment_date_rules[$today_weekday] : 3;
+                                $days_ahead = ($target_weekday - $today_weekday + 7) % 7;
+                                if ($days_ahead === 0) { $days_ahead = 7; }
+                                $pdate = clone $today;
+                                $pdate->modify("+{$days_ahead} days");
+                                $hesk_settings['datepicker']['#'.$k]['timestamp'] = $pdate->getTimestamp();
+                                $k_value = hesk_datepicker_format_date($pdate->getTimestamp());
                             }
+                            $hesk_settings['datepicker']['#'.$k]['payment_days']     = $payment_allowed_weekdays;
+                            $hesk_settings['datepicker']['#'.$k]['min_date_tomorrow'] = true;
                             echo '
                                 <section class="param calendar">
                                     <label>'.$v['name:'].' '.$v['req'].'</label>
@@ -866,7 +909,7 @@ if ( ! isset($_SESSION['as_status']))
                                         </button>
                                         <input name="'. $k .'" id="'. $k .'"
                                                value="'. $k_value .'"
-                                               type="text" class="datepicker">
+                                               type="text" class="datepicker" readonly>
                                     </div>
                                     <div class="calendar--value" '. ($k_value ? 'style="display: block"' : '') . '>
                                         <span class="'. $cls .'"><i>'. $k_value .'</i></span>
@@ -963,18 +1006,25 @@ if ( ! isset($_SESSION['as_status']))
             <?php if ($can_due_date): ?>
             <section class="param calendar">
                 <?php
-                // Default due date
-                $default_due_date_info = hesk_getCategoryDueDateInfo($category);
-
                 $due_date = isset($_SESSION['as_due_date']) ? $_SESSION['as_due_date'] : null;
                 if ($due_date && ($dd = hesk_datepicker_get_date($due_date))) {
                     $hesk_settings['datepicker']['#due_date']['timestamp'] = $dd->getTimestamp();
-                } elseif ($default_due_date_info !== null && $due_date === null) {
-                    $current_date = new DateTime('today midnight');
-                    $current_date->add(DateInterval::createFromDateString("+{$default_due_date_info['amount']} {$default_due_date_info['unit']}s"));
-                    $hesk_settings['datepicker']['#due_date']['timestamp'] = $current_date->getTimestamp();
-                    $due_date = hesk_datepicker_format_date($current_date->getTimestamp());
+                } elseif ($due_date === null) {
+                    // Calcula próximo dia de pagamento com base no dia atual
+                    $today = new DateTime('today midnight');
+                    $today_weekday = (int)$today->format('w');
+                    $target_weekday = isset($payment_date_rules[$today_weekday]) ? $payment_date_rules[$today_weekday] : 3;
+                    $days_ahead = ($target_weekday - $today_weekday + 7) % 7;
+                    if ($days_ahead === 0) { $days_ahead = 7; }
+                    $payment_date = clone $today;
+                    $payment_date->modify("+{$days_ahead} days");
+                    $hesk_settings['datepicker']['#due_date']['timestamp'] = $payment_date->getTimestamp();
+                    $due_date = hesk_datepicker_format_date($payment_date->getTimestamp());
                 }
+
+                // Passa restrições ao JS do datepicker
+                $hesk_settings['datepicker']['#due_date']['payment_days']     = $payment_allowed_weekdays;
+                $hesk_settings['datepicker']['#due_date']['min_date_tomorrow'] = true;
                 ?>
                 <label><?php echo $hesklang['due_date']; ?>:</label>
                 <div class="calendar--button">
@@ -985,7 +1035,7 @@ if ( ! isset($_SESSION['as_status']))
                     </button>
                     <input name="due_date" id="due_date"
                            value="<?php if (isset($due_date)) {echo stripslashes(hesk_input($due_date));} ?>"
-                           type="text" class="datepicker">
+                           type="text" class="datepicker" readonly>
                 </div>
                 <div class="calendar--value" style="<?php echo empty($due_date) ? '' : 'display: block'; ?>">
                 <span><?php echo isset($due_date) ? stripslashes($due_date) : ''; ?></span>
