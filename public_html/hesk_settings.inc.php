@@ -22,10 +22,10 @@ $hesk_settings['languages']=array(
 );
 
 // --> Database settings
-$hesk_settings['db_host']='localhost';
-$hesk_settings['db_name']='admin_ultratask';
-$hesk_settings['db_user']='admin_ultratask';
-$hesk_settings['db_pass']='1XaFkHS3J5';
+$hesk_settings['db_host']='168.196.106.144';
+$hesk_settings['db_name']='admin_ultratasks';
+$hesk_settings['db_user']='admin_ultratasks';
+$hesk_settings['db_pass']='*F=]xw2(}/iEBk=S';
 $hesk_settings['db_pfix']='hesk_';
 
 
@@ -82,7 +82,7 @@ $hesk_settings['attempt_limit']=6;
 $hesk_settings['attempt_banmin']=60;
 $hesk_settings['flood']=3;
 $hesk_settings['reset_pass']=1;
-$hesk_settings['email_view_ticket']=1;
+$hesk_settings['email_view_ticket']=0;
 $hesk_settings['x_frame_opt']=1;
 $hesk_settings['samesite']='Lax';
 $hesk_settings['force_ssl']=0;
