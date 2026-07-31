@@ -74,6 +74,20 @@ function get_approval_request($request_id) {
 } // END get_approval_request()
 
 
+function ticket_is_terminal($ticket_id) {
+    global $hesk_settings;
+
+    $res = hesk_dbQuery("SELECT `status` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets` WHERE `id`=".intval($ticket_id)." LIMIT 1");
+    if (hesk_dbNumRows($res) != 1) {
+        return false;
+    }
+
+    $status = (int) hesk_dbResult($res);
+
+    return in_array($status, array(3, 6), true); // Resolvido, Cancelado
+} // END ticket_is_terminal()
+
+
 function apply_ticket_decision($ticket_id, $trackid, $status_id, $status_name, $decided_by) {
     global $hesk_settings, $hesklang;
 
@@ -122,8 +136,21 @@ function handle_callback_query($callback, $roles) {
         return;
     }
 
+    if ($request['status'] === 'voided') {
+        hesk_tg_api('answerCallbackQuery', array('callback_query_id' => $callback_id, 'text' => 'Esse chamado já foi cancelado, ação não é mais necessária.', 'show_alert' => true));
+        return;
+    }
+
     if ($request['status'] !== 'pending') {
         hesk_tg_api('answerCallbackQuery', array('callback_query_id' => $callback_id, 'text' => 'Essa solicitação já foi respondida.'));
+        return;
+    }
+
+    // Last-second guard: even if nothing proactively voided this request, never let a
+    // decision apply to a ticket that's already been cancelled/resolved outside Telegram.
+    if (ticket_is_terminal($request['ticket_id'])) {
+        hesk_tg_void_pending_requests($request['ticket_id'], $request['trackid'], 'Chamado já estava cancelado/resolvido no sistema.');
+        hesk_tg_api('answerCallbackQuery', array('callback_query_id' => $callback_id, 'text' => 'Esse chamado já foi cancelado/resolvido, ação bloqueada.', 'show_alert' => true));
         return;
     }
 
@@ -224,6 +251,12 @@ function handle_message($message, $roles) {
     }
 
     if ((int) $request['telegram_chat_id'] !== (int) $chat_id) {
+        return;
+    }
+
+    if (ticket_is_terminal($request['ticket_id'])) {
+        hesk_tg_void_pending_requests($request['ticket_id'], $request['trackid'], 'Chamado já estava cancelado/resolvido no sistema.');
+        hesk_tg_api('sendMessage', array('chat_id' => $chat_id, 'text' => 'Esse chamado já foi cancelado/resolvido, ação bloqueada.'));
         return;
     }
 

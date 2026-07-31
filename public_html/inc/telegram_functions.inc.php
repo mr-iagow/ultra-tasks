@@ -332,3 +332,64 @@ function hesk_tg_notify_new_ticket($ticket_id, $trackid, $category_id, $subject,
         hesk_tg_notify_approval_request($ticket, 'auditoria', $roles);
     }
 } // END hesk_tg_notify_new_ticket()
+
+
+/**
+ * Cancels/voids any still-pending Telegram approval requests for a ticket: marks the
+ * tracking rows 'voided' and edits their Telegram messages to remove the buttons and
+ * explain why. Used both proactively (ticket cancelled/resolved via the normal status
+ * screens) and reactively (someone tries to click Aprovar/Reprovar on a request whose
+ * ticket turns out to already be voided - see telegram_webhook.php).
+ */
+function hesk_tg_void_pending_requests($ticket_id, $trackid, $reason_text) {
+    global $hesk_settings;
+
+    $res = hesk_dbQuery("SELECT `id`, `role`, `telegram_chat_id`, `telegram_message_id` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."telegram_approval_requests`
+        WHERE `ticket_id`=".intval($ticket_id)." AND `status`='pending'");
+
+    while ($row = hesk_dbFetchAssoc($res)) {
+        hesk_dbQuery("UPDATE `".hesk_dbEscape($hesk_settings['db_pfix'])."telegram_approval_requests`
+            SET `status`='voided', `responded_at`=NOW() WHERE `id`=".intval($row['id']));
+
+        if ($row['telegram_message_id']) {
+            hesk_tg_api('editMessageText', array(
+                'chat_id'    => $row['telegram_chat_id'],
+                'message_id' => $row['telegram_message_id'],
+                'text'       => "⚠️ *Ação não é mais necessária*\nTicket #".hesk_tg_escape_markdown($trackid)."\n".hesk_tg_escape_markdown($reason_text),
+                'parse_mode' => 'Markdown',
+            ));
+        }
+
+        hesk_tg_log("Voided request #{$row['id']} (ticket {$trackid}, role {$row['role']}): {$reason_text}");
+    }
+} // END hesk_tg_void_pending_requests()
+
+
+/**
+ * Hook for whenever a ticket's status changes outside the Telegram flow (staff/customer
+ * cancelling, resolving, etc.). If the ticket lands on a terminal "handled elsewhere"
+ * status, any pending approval requests for it are voided immediately - so nobody
+ * approves/rejects something that no longer needs a decision.
+ */
+function hesk_tg_notify_ticket_status_changed($trackid, $new_status_id) {
+    global $hesk_settings;
+
+    if (empty($hesk_settings['telegram_bot_token'])) {
+        return;
+    }
+
+    // Resolvido, Cancelado - anything else is still "in flight" and shouldn't void a pending ask.
+    $terminal_statuses = array(3, 6);
+    if (!in_array((int) $new_status_id, $terminal_statuses, true)) {
+        return;
+    }
+
+    $res = hesk_dbQuery("SELECT `id` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets` WHERE `trackid`='".hesk_dbEscape($trackid)."' LIMIT 1");
+    if (hesk_dbNumRows($res) != 1) {
+        return;
+    }
+    $ticket_id = hesk_dbResult($res);
+
+    $status_name = hesk_get_status_name((int) $new_status_id);
+    hesk_tg_void_pending_requests($ticket_id, $trackid, "Chamado marcado como \"{$status_name}\" antes da decisão.");
+} // END hesk_tg_notify_ticket_status_changed()

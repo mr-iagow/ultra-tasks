@@ -119,4 +119,9 @@ if (hesk_dbAffectedRows() != 1)
 	hesk_error("$hesklang[int_error]: $hesklang[trackID_not_found].");
 }
 
+// Void any still-pending Telegram approval asks - no point approving something staff
+// already resolved/cancelled directly in the system.
+require(HESK_PATH . 'inc/telegram_functions.inc.php');
+hesk_tg_notify_ticket_status_changed($trackingID, $status);
+
 hesk_process_messages($action,'admin_ticket.php?track='.$trackingID.'&Refresh='.rand(10000,99999),'SUCCESS');

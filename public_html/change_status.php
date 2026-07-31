@@ -121,6 +121,11 @@ if (hesk_dbAffectedRows() != 1)
 	hesk_process_messages($hesklang['elocked'],'ticket.php');
 }
 
+// Void any still-pending Telegram approval asks - no point approving something the
+// customer already closed themselves.
+require(HESK_PATH . 'inc/telegram_functions.inc.php');
+hesk_tg_notify_ticket_status_changed($trackingID, $status);
+
 // Show success message
 if ($status != 3)
 {

@@ -56,7 +56,7 @@ hesk_tg_log('Finished pending approvals notification run.');
 function reconcile_pending_requests($roles) {
     global $hesk_settings;
 
-    $res = hesk_dbQuery("SELECT `r`.`id`, `r`.`role`, `r`.`telegram_chat_id`, `r`.`telegram_message_id`, `t`.`status`, `t`.`trackid`
+    $res = hesk_dbQuery("SELECT `r`.`id`, `r`.`ticket_id`, `r`.`role`, `r`.`telegram_chat_id`, `r`.`telegram_message_id`, `t`.`status`, `t`.`trackid`
         FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."telegram_approval_requests` AS `r`
         INNER JOIN `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets` AS `t` ON `t`.`id` = `r`.`ticket_id`
         WHERE `r`.`status` = 'pending'");
@@ -68,6 +68,15 @@ function reconcile_pending_requests($roles) {
 
         $cfg = $roles[$row['role']];
         $ticket_status = (int) $row['status'];
+
+        // Ticket got cancelled/resolved outside Telegram before anyone decided - void it
+        // rather than leave a stale "aprovar/reprovar" prompt around. This is a backstop;
+        // the same thing normally happens instantly via hesk_tg_notify_ticket_status_changed().
+        if (in_array($ticket_status, array(3, 6), true)) {
+            hesk_tg_void_pending_requests($row['ticket_id'], $row['trackid'], 'Chamado marcado como "'.hesk_get_status_name($ticket_status).'" antes da decisão.');
+            hesk_tg_log("Reconciled request #{$row['id']} (ticket {$row['trackid']}, role {$row['role']}) as voided.");
+            continue;
+        }
 
         $new_state = null;
         if ($cfg['approved_id'] !== null && $ticket_status === $cfg['approved_id']) {
