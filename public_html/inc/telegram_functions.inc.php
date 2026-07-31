@@ -300,6 +300,46 @@ function hesk_tg_send_ticket_attachments($chat_id, $trackid) {
 
 
 /**
+ * Hook for whenever a file gets attached to a ticket AFTER it was created (a staff
+ * reply, an internal note, a customer reply) - not just at submission time. If the
+ * ticket still has a pending Telegram approval, the new file(s) get forwarded to
+ * whoever is being asked to decide, so they see the full documentation before acting.
+ *
+ * $new_attachments: array of ['saved_name' => ..., 'real_name' => ...].
+ * Best-effort: any failure here must never break the reply/note being saved.
+ */
+function hesk_tg_send_late_attachments($trackid, $new_attachments) {
+    global $hesk_settings;
+
+    if (empty($hesk_settings['telegram_bot_token']) || empty($new_attachments)) {
+        return;
+    }
+
+    $res = hesk_dbQuery("SELECT DISTINCT `telegram_chat_id` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."telegram_approval_requests`
+        WHERE `trackid`='".hesk_dbEscape($trackid)."' AND `status`='pending'");
+
+    $chat_ids = array();
+    while ($row = hesk_dbFetchAssoc($res)) {
+        $chat_ids[] = $row['telegram_chat_id'];
+    }
+
+    if (empty($chat_ids)) {
+        return;
+    }
+
+    foreach ($chat_ids as $chat_id) {
+        foreach ($new_attachments as $att) {
+            $file_path = HESK_PATH . $hesk_settings['attach_dir'] . '/' . $att['saved_name'];
+            $result = hesk_tg_send_document($chat_id, $file_path, $att['real_name'], "📎 Novo anexo no ticket #{$trackid}");
+            if ($result === null) {
+                hesk_tg_log("Failed to send late attachment '{$att['real_name']}' for ticket {$trackid}.");
+            }
+        }
+    }
+} // END hesk_tg_send_late_attachments()
+
+
+/**
  * Instant-notify hook, called from hesk_newTicket() right after a ticket is inserted.
  * Best-effort: any failure here must never break ticket submission itself.
  */

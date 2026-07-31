@@ -415,6 +415,9 @@ if (isset($_POST['notemsg']) && hesk_token_check('POST'))
 				hesk_dbQuery("INSERT INTO `".hesk_dbEscape($hesk_settings['db_pfix'])."attachments` (`ticket_id`,`saved_name`,`real_name`,`size`,`type`) VALUES ('".hesk_dbEscape($trackingID)."','".hesk_dbEscape($myatt['saved_name'])."','".hesk_dbEscape($myatt['real_name'])."','".intval($myatt['size'])."', '1')");
 				$myattachments .= hesk_dbInsertID() . '#' . $myatt['real_name'] .',';
 			}
+
+			require(HESK_PATH . 'inc/telegram_functions.inc.php');
+			hesk_tg_send_late_attachments($trackingID, $attachments);
 		}
 
 		// Add note to database
