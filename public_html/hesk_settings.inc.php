@@ -28,6 +28,11 @@ $hesk_settings['db_user']='admin_ultratasks';
 $hesk_settings['db_pass']='*F=]xw2(}/iEBk=S';
 $hesk_settings['db_pfix']='hesk_';
 
+// --> Telegram integration (bot token / webhook secret - gitignored, not committed)
+if (file_exists(__DIR__ . '/inc/telegram_settings.inc.php')) {
+    require(__DIR__ . '/inc/telegram_settings.inc.php');
+}
+
 
 // ==> HELP DESK
 

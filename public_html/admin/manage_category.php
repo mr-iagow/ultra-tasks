@@ -45,7 +45,9 @@ $category = array(
     'autoassign_config' => null,
     'type' => 0,
     'default_due_date_unit' => 'day',
-    'default_due_date_amount' => ''
+    'default_due_date_amount' => '',
+    'require_ddh_approval' => 0,
+    'require_auditoria_approval' => 0
 );
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -67,6 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $category['type'] = intval($row['type']);
         $category['default_due_date_amount'] = $row['default_due_date_amount'] ? intval($row['default_due_date_amount']) : '';
         $category['default_due_date_unit'] = $row['default_due_date_unit'];
+        $category['require_ddh_approval'] = intval($row['require_ddh_approval']);
+        $category['require_auditoria_approval'] = intval($row['require_auditoria_approval']);
     }
 
     // If we're still on ID 0, then the category ID passed in doesn't exist
@@ -266,6 +270,24 @@ if (hesk_SESSION('iserror')) {
                 </div>
                 <div><?php echo $hesklang['category_leave_blank_for_no_default_due_date']; ?></div>
             </div>
+            <div class="form-group">
+                <div class="checkbox-custom">
+                    <input type="checkbox"
+                           id="require_ddh_approval"
+                           name="require_ddh_approval"
+                           value="1"
+                           <?php if ($category['require_ddh_approval']): ?>checked<?php endif; ?>>
+                    <label for="require_ddh_approval"><?php echo $hesklang['require_ddh_approval']; ?></label>
+                </div>
+                <div class="checkbox-custom">
+                    <input type="checkbox"
+                           id="require_auditoria_approval"
+                           name="require_auditoria_approval"
+                           value="1"
+                           <?php if ($category['require_auditoria_approval']): ?>checked<?php endif; ?>>
+                    <label for="require_auditoria_approval"><?php echo $hesklang['require_auditoria_approval']; ?></label>
+                </div>
+            </div>
             <input type="hidden" name="id" value="<?php echo $category['id']; ?>">
             <input type="hidden" name="token" value="<?php hesk_token_echo(); ?>">
             <button class="btn btn-full" type="submit" ripple="ripple"><?php echo $hesklang['create_cat']; ?></button>
@@ -367,6 +389,9 @@ function try_save_category()
 
     $category['type'] = hesk_POST('type') === '1' ? 1 : 0;
 
+    $category['require_ddh_approval'] = hesk_POST('require_ddh_approval') === '1' ? 1 : 0;
+    $category['require_auditoria_approval'] = hesk_POST('require_auditoria_approval') === '1' ? 1 : 0;
+
     // Default priority
     $category['priority'] = hesk_checkMinMax(hesk_POST('priority'), 0, 3, $priorities['low']['id']);
 
@@ -411,7 +436,8 @@ function try_save_category()
     $sql_friendly_due_date_unit = $sql_friendly_due_date_amount === 'NULL' ? 'NULL' : "'".hesk_dbEscape($category['default_due_date_unit'])."'";
     if ($category['id'] === 0) {
         hesk_dbQuery("INSERT INTO `".hesk_dbEscape($hesk_settings['db_pfix'])."categories` (`name`,`cat_order`,`autoassign`,
-                      `autoassign_config`,`type`, `priority`,`default_due_date_amount`,`default_due_date_unit`) 
+                      `autoassign_config`,`type`, `priority`,`default_due_date_amount`,`default_due_date_unit`,
+                      `require_ddh_approval`,`require_auditoria_approval`)
                     VALUES ('".hesk_dbEscape($category['name'])."',
                             '".intval($my_order)."',
                             '".intval($category['autoassign'])."',
@@ -419,7 +445,9 @@ function try_save_category()
                             '".intval($category['type'])."',
                             '".intval($category['priority'])."',
                             ".$sql_friendly_due_date_amount.",
-                            ".$sql_friendly_due_date_unit.")");
+                            ".$sql_friendly_due_date_unit.",
+                            '".intval($category['require_ddh_approval'])."',
+                            '".intval($category['require_auditoria_approval'])."')");
         $_SESSION['selcat2'] = hesk_dbInsertID();
     } else {
         hesk_dbQuery("UPDATE `".hesk_dbEscape($hesk_settings['db_pfix'])."categories`
@@ -429,7 +457,9 @@ function try_save_category()
                           `type` = '".intval($category['type'])."',
                           `priority` = '".intval($category['priority'])."',
                           `default_due_date_amount` = {$sql_friendly_due_date_amount},
-                          `default_due_date_unit` = {$sql_friendly_due_date_unit}
+                          `default_due_date_unit` = {$sql_friendly_due_date_unit},
+                          `require_ddh_approval` = '".intval($category['require_ddh_approval'])."',
+                          `require_auditoria_approval` = '".intval($category['require_auditoria_approval'])."'
                       WHERE `id` = ".intval($category['id']));
         $_SESSION['selcat2'] = $category['id'];
     }

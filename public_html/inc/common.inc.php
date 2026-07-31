@@ -1029,6 +1029,31 @@ function hesk_getCategoryDueDateInfo($id) {
     return $hesk_settings['category_data'][$id]['due_date_info'];
 }
 
+function hesk_categoryApprovalFlags($id) {
+    global $hesk_settings;
+
+    if ( isset($hesk_settings['category_data'][$id]['approval_flags']) )
+    {
+        return $hesk_settings['category_data'][$id]['approval_flags'];
+    }
+
+    $res = hesk_dbQuery("SELECT `require_ddh_approval`, `require_auditoria_approval` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."categories` WHERE `id`='".intval($id)."' LIMIT 1");
+
+    if (hesk_dbNumRows($res) != 1)
+    {
+        return array('ddh' => false, 'auditoria' => false);
+    }
+
+    $category = hesk_dbFetchAssoc($res);
+
+    $hesk_settings['category_data'][$id]['approval_flags'] = array(
+        'ddh' => (bool) $category['require_ddh_approval'],
+        'auditoria' => (bool) $category['require_auditoria_approval']
+    );
+
+    return $hesk_settings['category_data'][$id]['approval_flags'];
+}
+
 
 function hesk_getReplierName($ticket)
 {

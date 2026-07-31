@@ -177,6 +177,13 @@ function hesk_newTicket($ticket)
         hesk_PMtoMainAdmin($info['id']);
     }
 
+    // Instant Telegram approval notification if this ticket's category requires DDH/Auditoria
+    // sign-off. Covers every ticket origin (web form, admin-created, email piping) since they
+    // all funnel through here. Best-effort: never let this break ticket submission.
+    require_once(HESK_PATH . 'inc/statuses.inc.php');
+    require_once(HESK_PATH . 'inc/telegram_functions.inc.php');
+    hesk_tg_notify_new_ticket($info['id'], $info['trackid'], $info['category'], $info['subject'], $info['name'], $info['message']);
+
     return hesk_ticketToPlain($info, 1);
 
 } // END hesk_newTicket()
