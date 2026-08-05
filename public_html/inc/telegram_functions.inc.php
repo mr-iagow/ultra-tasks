@@ -433,3 +433,57 @@ function hesk_tg_notify_ticket_status_changed($trackid, $new_status_id) {
     $status_name = hesk_get_status_name((int) $new_status_id);
     hesk_tg_void_pending_requests($ticket_id, $trackid, "Chamado marcado como \"{$status_name}\" antes da decisão.");
 } // END hesk_tg_notify_ticket_status_changed()
+
+
+/**
+ * Purely informational heads-up to the Auditoria approver when DDH approves a
+ * ticket that also requires Auditoria sign-off. Doesn't create or touch any
+ * approval_requests row - it's just context so Auditoria knows DDH already
+ * signed off before they make their own (independent) decision.
+ */
+function hesk_tg_notify_ddh_approved($trackid, $new_status_id, $approved_by_name) {
+    global $hesk_settings;
+
+    if (empty($hesk_settings['telegram_bot_token'])) {
+        return;
+    }
+
+    $roles = hesk_tg_role_config();
+    if ($roles['ddh']['approved_id'] === null || (int) $new_status_id !== $roles['ddh']['approved_id']) {
+        return; // this status change isn't "Aprovado DDH"
+    }
+
+    $res = hesk_dbQuery("SELECT `c`.`require_auditoria_approval` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets` AS `t`
+        INNER JOIN `".hesk_dbEscape($hesk_settings['db_pfix'])."categories` AS `c` ON `c`.`id` = `t`.`category`
+        WHERE `t`.`trackid`='".hesk_dbEscape($trackid)."' LIMIT 1");
+    if (hesk_dbNumRows($res) != 1) {
+        return;
+    }
+    $row = hesk_dbFetchAssoc($res);
+    if (!$row['require_auditoria_approval']) {
+        return;
+    }
+
+    $chat_id = hesk_tg_get_approver_chat_id('auditoria');
+    if ($chat_id === null) {
+        return;
+    }
+
+    $message_params = array(
+        'chat_id'    => $chat_id,
+        'text'       => "ℹ️ *Aviso*\nA etapa DDH do ticket #".hesk_tg_escape_markdown($trackid)." já foi aprovada por ".hesk_tg_escape_markdown($approved_by_name).".\nApenas informativo - não é necessário agir aqui.",
+        'parse_mode' => 'Markdown',
+    );
+
+    // Reply to Auditoria's own still-pending "aprovação necessária" message for this
+    // ticket, if there is one, so the heads-up stays threaded instead of floating loose.
+    $pending_res = hesk_dbQuery("SELECT `telegram_message_id` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."telegram_approval_requests`
+        WHERE `trackid`='".hesk_dbEscape($trackid)."' AND `role`='auditoria' AND `status`='pending' AND `telegram_message_id` IS NOT NULL LIMIT 1");
+    if (hesk_dbNumRows($pending_res) == 1) {
+        $message_params['reply_to_message_id'] = hesk_dbResult($pending_res);
+    }
+
+    hesk_tg_api('sendMessage', $message_params);
+
+    hesk_tg_log("Sent DDH-approved heads-up to auditoria for ticket {$trackid}.");
+} // END hesk_tg_notify_ddh_approved()

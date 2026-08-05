@@ -123,5 +123,6 @@ if (hesk_dbAffectedRows() != 1)
 // already resolved/cancelled directly in the system.
 require(HESK_PATH . 'inc/telegram_functions.inc.php');
 hesk_tg_notify_ticket_status_changed($trackingID, $status);
+hesk_tg_notify_ddh_approved($trackingID, $status, $_SESSION['name']);
 
 hesk_process_messages($action,'admin_ticket.php?track='.$trackingID.'&Refresh='.rand(10000,99999),'SUCCESS');

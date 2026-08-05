@@ -415,6 +415,12 @@ $sql .= " WHERE `id`='{$replyto}'";
 hesk_dbQuery($sql);
 unset($sql);
 
+// Void any still-pending Telegram approval asks - a reply can change the status
+// (e.g. resolve/cancel) just as much as the dedicated change_status.php screen.
+require(HESK_PATH . 'inc/telegram_functions.inc.php');
+hesk_tg_notify_ticket_status_changed($ticket['trackid'], $new_status);
+hesk_tg_notify_ddh_approved($ticket['trackid'], $new_status, $_SESSION['name']);
+
 /* Update number of replies in the users table */
 hesk_dbQuery("UPDATE `".hesk_dbEscape($hesk_settings['db_pfix'])."users` SET `replies`=`replies`+1 WHERE `id`='".intval($_SESSION['id'])."'");
 
