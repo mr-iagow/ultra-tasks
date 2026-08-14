@@ -34,6 +34,10 @@ if (!defined('IN_SCRIPT')) {
             border-bottom: 1px solid #ddd;
         }
 
+        td:first-child {
+            font-weight: bold;
+        }
+
         hr {
             border: 0;
             color: #9e9e9e;
@@ -195,7 +199,52 @@ if (!defined('IN_SCRIPT')) {
 
             <?php if ($ticket['message_html'] != ''): ?>
                 <hr>
-                <p><?php echo $ticket['message_html']; ?></p>
+                <?php
+                    $message_lines = preg_split('/<br\s*\/?>/i', $ticket['message_html']);
+                    $in_field_table = false;
+                ?>
+                <?php foreach ($message_lines as $message_line): ?>
+                    <?php
+                        $message_line = trim($message_line);
+                        $plain_line = trim(strip_tags($message_line));
+
+                        // Blank lines are just spacing from the editor - skip them
+                        // without breaking a field table that's already open
+                        if ($plain_line === '') {
+                            continue;
+                        }
+
+                        $is_field_line = false;
+                        $field_label = '';
+                        $field_value = '';
+
+                        if (preg_match('/^([\p{L}\p{N}][\p{L}\p{N} \/,.()?"\'\-$%]{0,80}):\s*(.*)$/u', $message_line, $line_matches)) {
+                            $label_check = trim(strip_tags($line_matches[1]));
+                            if ($label_check !== '' && $label_check === mb_strtoupper($label_check, 'UTF-8')) {
+                                $is_field_line = true;
+                                $field_label = $line_matches[1];
+                                $field_value = $line_matches[2];
+                            }
+                        }
+                    ?>
+                    <?php if ($is_field_line): ?>
+                        <?php if (!$in_field_table): $in_field_table = true; ?>
+                            <table border="0">
+                        <?php endif; ?>
+                            <tr>
+                                <td><?php echo $field_label; ?>:</td>
+                                <td><?php echo $field_value; ?></td>
+                            </tr>
+                    <?php else: ?>
+                        <?php if ($in_field_table): $in_field_table = false; ?>
+                            </table>
+                        <?php endif; ?>
+                        <p><?php echo $message_line; ?></p>
+                    <?php endif; ?>
+                <?php endforeach; ?>
+                <?php if ($in_field_table): ?>
+                    </table>
+                <?php endif; ?>
             <?php endif; ?>
 
             <?php if (count($ticket['replies'])): ?>
