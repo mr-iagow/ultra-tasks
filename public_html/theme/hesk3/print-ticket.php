@@ -199,6 +199,7 @@ if (!defined('IN_SCRIPT')) {
 
             <?php if ($ticket['message_html'] != ''): ?>
                 <hr>
+                <div class="section-title">DETALHES DO PAGAMENTO ABAIXO</div>
                 <?php
                     $message_lines = preg_split('/<br\s*\/?>/i', $ticket['message_html']);
                     $in_field_table = false;
