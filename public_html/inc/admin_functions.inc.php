@@ -574,7 +574,7 @@ function hesk_isLoggedIn()
         // hesk_session_regenerate_id();
 
 		// Let's make sure access data is up-to-date
-		$res = hesk_dbQuery( "SELECT `user`, `pass`, `isadmin`, `categories`, `heskprivileges` FROM `".$hesk_settings['db_pfix']."users` WHERE `id` = '".intval($_SESSION['id'])."' LIMIT 1" );
+		$res = hesk_dbQuery( "SELECT `user`, `pass`, `pass_reset_required`, `isadmin`, `categories`, `heskprivileges` FROM `".$hesk_settings['db_pfix']."users` WHERE `id` = '".intval($_SESSION['id'])."' LIMIT 1" );
 
 		// Exit if user not found
 		if (hesk_dbNumRows($res) != 1)
@@ -612,6 +612,13 @@ function hesk_isLoggedIn()
 		{
 			require(HESK_PATH . 'inc/users_online.inc.php');
             hesk_initOnline($_SESSION['id']);
+		}
+
+		// Force the user to set a new password before accessing anything else
+		if ($me['pass_reset_required'] == '1' && basename($_SERVER['SCRIPT_NAME']) != 'profile.php')
+		{
+			header('Location: ' . $hesk_settings['hesk_url'] . '/' . $hesk_settings['admin_dir'] . '/profile.php?pwreset=1');
+			exit();
 		}
 
         return true;

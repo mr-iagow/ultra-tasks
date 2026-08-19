@@ -175,6 +175,7 @@ if ( $action = hesk_REQUEST('a') )
 	elseif ($action == 'remove')     {remove();}
 	elseif ($action == 'autoassign') {toggle_autoassign();}
     elseif ($action == 'resetmfa')   {reset_mfa();}
+    elseif ($action == 'forcepwreset') {force_password_reset_all();}
     else 							 {hesk_error($hesklang['invalid_action']);}
 }
 
@@ -274,6 +275,13 @@ if (hesk_dbNumRows($res) > 0)
         </h2>
         <?php if ($can_man_users): ?>
         <button class="btn btn btn--blue-border" ripple="ripple" data-action="team-create"><?php echo $hesklang['new_team_member']; ?></button>
+        <?php
+        $force_pwreset_modal_id = hesk_generate_delete_modal($hesklang['pass_reset_forced_all_title'],
+            $hesklang['pass_reset_forced_all_confirm'],
+            'manage_users.php?a=forcepwreset&amp;token='.hesk_token_echo(0),
+            $hesklang['pass_reset_forced_all_yes']);
+        ?>
+        <a href="javascript:" data-modal="[data-modal-id='<?php echo $force_pwreset_modal_id; ?>']" class="btn btn btn--blue-border"><?php echo $hesklang['pass_reset_forced_all_button']; ?></a>
         <?php endif; ?>
     </section>
     <div class="table-wrap">
@@ -1252,5 +1260,16 @@ function reset_mfa() {
     delete_mfa_codes($myuser);
 
     hesk_process_messages($hesklang['mfa_reset'], './manage_users.php', 'SUCCESS');
+}
+
+function force_password_reset_all() {
+    global $hesk_settings, $hesklang;
+
+    /* A security check */
+    hesk_token_check();
+
+    hesk_dbQuery("UPDATE `".hesk_dbEscape($hesk_settings['db_pfix'])."users` SET `pass_reset_required` = '1'");
+
+    hesk_process_messages($hesklang['pass_reset_forced_all'], './manage_users.php', 'SUCCESS');
 }
 ?>

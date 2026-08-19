@@ -77,6 +77,12 @@ if ( ! isset($_SESSION['new']['username']))
 	$_SESSION['new']['username'] = '';
 }
 
+/* Admin forced a mandatory password change for this user */
+if (hesk_GET('pwreset') == 1)
+{
+    $_SESSION['must_reset_password'] = true;
+}
+
 /* Print header */
 require_once(HESK_PATH . 'inc/header.inc.php');
 
@@ -91,6 +97,11 @@ if (!hesk_SESSION(array('new', 'errors')) && !hesk_SESSION(array('newpass', 'err
 if (defined('WARN_PASSWORD'))
 {
 	hesk_show_notice($hesklang['chdp2'],'<span class="important">'.$hesklang['security'].'</span>');
+}
+
+if (hesk_SESSION('must_reset_password'))
+{
+    hesk_show_notice($hesklang['pass_reset_required_notice'],'<span class="important">'.$hesklang['security'].'</span>');
 }
 ?>
 <div class="main__content profile">
@@ -227,7 +238,7 @@ if (defined('WARN_PASSWORD'))
         </form>
     </div>
 </div>
-<div class="right-bar profile-password" <?php echo (hesk_SESSION(array('newpass','errors')) || hesk_SESSION('password_reset')) ? 'style="display: block"' : ''; ?>>
+<div class="right-bar profile-password" <?php echo (hesk_SESSION(array('newpass','errors')) || hesk_SESSION('password_reset') || hesk_SESSION('must_reset_password')) ? 'style="display: block"' : ''; ?>>
     <div class="right-bar__body form" data-step="1">
         <h3>
             <a href="javascript:">
@@ -371,7 +382,9 @@ function update_password() {
     else
     {
         $newpass_hash = hesk_password_hash($_SESSION['newpass']['pass_new']);
-		hesk_dbQuery("UPDATE `".hesk_dbEscape($hesk_settings['db_pfix'])."users` SET `pass` = '".hesk_dbEscape($newpass_hash)."' WHERE `id` = ".intval($_SESSION['id']));
+		hesk_dbQuery("UPDATE `".hesk_dbEscape($hesk_settings['db_pfix'])."users` SET `pass` = '".hesk_dbEscape($newpass_hash)."', `pass_reset_required` = '0' WHERE `id` = ".intval($_SESSION['id']));
+
+        hesk_cleanSessionVars('must_reset_password');
 
         // Force login after password change
         hesk_forceLogout($hesklang['pass_login'], null, null, 'NOTICE');
