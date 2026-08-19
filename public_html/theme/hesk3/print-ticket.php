@@ -239,7 +239,16 @@ if (!defined('IN_SCRIPT')) {
                         <?php if ($in_field_table): $in_field_table = false; ?>
                             </table>
                         <?php endif; ?>
-                        <p><?php echo $message_line; ?></p>
+                        <?php
+                            // Label-only lines (all caps, no colon/value) get the same
+                            // bold treatment as the field rows for visual consistency
+                            $is_label_only = preg_match('/\p{L}/u', $plain_line) && $plain_line === mb_strtoupper($plain_line, 'UTF-8');
+                        ?>
+                        <?php if ($is_label_only): ?>
+                            <p><b><?php echo $message_line; ?></b></p>
+                        <?php else: ?>
+                            <p><?php echo $message_line; ?></p>
+                        <?php endif; ?>
                     <?php endif; ?>
                 <?php endforeach; ?>
                 <?php if ($in_field_table): ?>
