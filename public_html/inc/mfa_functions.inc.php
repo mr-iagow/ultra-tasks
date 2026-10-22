@@ -57,7 +57,7 @@ function send_mfa_email($name, $email, $verification_code) {
     list($msg, $html_msg) = hesk_replace_email_tag('%%VERIFICATION_CODE%%', $verification_code, $msg, $html_msg);
 
     // Send email
-    return hesk_mail($email, str_replace('%%VERIFICATION_CODE%%', $verification_code, $hesklang['mfa_verification']), $msg, $html_msg);
+    return hesk_mail($email, str_replace('%%VERIFICATION_CODE%%', $verification_code, $hesklang['mfa_verification']), $msg, $html_msg, null, 'mfa_verification');
 }
 
 // Note: Deletes all verification codes upon successful validation

@@ -1,3 +1,6 @@
 public_html/inc/telegram_settings.inc.php
 .claude/
 public_html/cache/*.cache.php
+
+public_html/cache/__latest.txt
+public_html/cache/hesk_export_*.zip

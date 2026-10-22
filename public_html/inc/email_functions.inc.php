@@ -26,6 +26,14 @@ require_once(HESK_PATH . 'inc/custom_fields.inc.php');
 // Make sure statuses are loaded
 require_once(HESK_PATH . 'inc/statuses.inc.php');
 
+// Only these email types are actually sent. Every other email (ticket created,
+// replied, closed, notes, PMs, overdue...) is silently dropped by hesk_mail().
+// Return false to restore the default HESK behavior (send everything).
+function hesk_emailAllowedTemplates()
+{
+    return array('reset_password', 'mfa_verification');
+} // END hesk_emailAllowedTemplates()
+
 function hesk_notifyCustomer($email_template = 'new_ticket')
 {
     global $hesk_settings, $hesklang, $ticket;
@@ -270,12 +278,18 @@ function hesk_validEmails()
 } // END hesk_validEmails()
 
 
-function hesk_mail($to, $subject, $message, $html_message, $tracking_ID = null)
+function hesk_mail($to, $subject, $message, $html_message, $tracking_ID = null, $email_template = null)
 {
     global $hesk_settings, $hesklang;
 
     // Demo mode
     if (defined('HESK_DEMO')) {
+        return true;
+    }
+
+    // Email type not in the allow list? Pretend it was sent
+    $allowed_templates = hesk_emailAllowedTemplates();
+    if (is_array($allowed_templates) && ! in_array($email_template, $allowed_templates, true)) {
         return true;
     }
 

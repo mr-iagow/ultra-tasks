@@ -164,7 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST')
                 $html_msg);
 
 			// Send email
-			hesk_mail($email, $hesklang['reset_password'], $msg, $html_msg);
+			hesk_mail($email, $hesklang['reset_password'], $msg, $html_msg, null, 'reset_password');
 
 			// Show success
             $show_sent_email_message = true;
