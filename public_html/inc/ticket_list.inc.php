@@ -272,6 +272,9 @@ if (true)
     "javascript:document.getElementById('delete-tickets-form').submit()",
         $hesklang['confirm']);
 
+    // Search form above the ticket list
+    require_once(HESK_PATH . 'inc/show_find_form.inc.php');
+
     // Are some open tickets hidden?
     if ($href != 'find_tickets.php' && $totals['filtered']['open'] != $totals['open'])
     {
@@ -338,7 +341,8 @@ if (true)
 	$is_table = 0;
 	$space = 0;
 
-	while ($ticket=hesk_dbFetchAssoc($result))
+	// No rows when the count is zero (e.g. quick link the user can't see), otherwise rows would print without a table
+	while ($total > 0 && $ticket=hesk_dbFetchAssoc($result))
 	{
 		// Are we grouping tickets?
 		if ($group)
@@ -387,34 +391,23 @@ if (true)
 		// Set message (needed for row title)
 		$ticket['message'] = $first_line . hesk_mb_substr(strip_tags($ticket['message']),0,200).'...';
 
-		// Start ticket row
-		echo '
-		<tr title="'.$ticket['message'].'" class="status-'. $ticket['status'] .' '.($ticket['owner'] ? '' : 'new').($ticket['priority'] == 'critical' ? ' bg-critical' : '').'">
-		<td class="table__first_th sindu_handle">
-            <div class="checkbox-custom">
-                <input type="checkbox" id="ticket_check_'.$ticket['id'].'" name="id[]" value="'.$ticket['id'].'" class="group' . $hesk_settings['hesk-group-count'] . '">
-                <label for="ticket_check_'.$ticket['id'].'">&nbsp;</label>
-            </div>
-        </td>
-		';
+		// Prepare cell contents; columns are printed later following hesk_ut_list_columns()
+		$cells = array();
+		$ticket_link = 'admin_ticket.php?track='.$ticket['trackid'].'&amp;Refresh='.$random;
 
-		// Print sequential ID and link it to the ticket page
+		// Sequential ID linked to the ticket page
 		if ( hesk_show_column('id') )
 		{
-			echo '<td><a href="admin_ticket.php?track='.$ticket['trackid'].'&amp;Refresh='.$random.'">'.$ticket['id'].'</a></td>';
+			$cells['id'] = '<a href="'.$ticket_link.'">'.$ticket['id'].'</a>';
 		}
 
-		// Print tracking ID and link it to the ticket page
+		// Tracking ID linked to the ticket page
 		if ( hesk_show_column('trackid') )
 		{
-			echo '<td class="trackid">
-                <div class="table__td-id">
-                    <a class="link" href="admin_ticket.php?track='.$ticket['trackid'].'&amp;Refresh='.$random.'">'.$ticket['trackid'].'</a>
-                </div>
-            </td>';
+			$cells['trackid'] = '<a class="link" href="'.$ticket_link.'">'.$ticket['trackid'].'</a>';
 		}
 
-		// Print date submitted
+		// Date submitted
 		if ( hesk_show_column('dt') )
 		{
 			switch ($hesk_settings['submittedformat'])
@@ -434,10 +427,10 @@ if (true)
 				default:
 					$ticket['dt'] = hesk_time_since( strtotime($ticket['dt']) );
 			}
-			echo '<td>'.$ticket['dt'].'</td>';
+			$cells['dt'] = $ticket['dt'];
 		}
 
-		// Print last modified
+		// Last modified
 		if ( hesk_show_column('lastchange') )
 		{
 			switch ($hesk_settings['updatedformat'])
@@ -457,69 +450,69 @@ if (true)
 				default:
 					$ticket['lastchange'] = hesk_time_since( strtotime($ticket['lastchange']) );
 			}
-			echo '<td>'.$ticket['lastchange'].'</td>';
+			$cells['lastchange'] = $ticket['lastchange'];
 		}
 
-		// Print ticket category
+		// Ticket category
 		if ( hesk_show_column('category') )
 		{
 			$ticket['category_name'] = isset($hesk_settings['categories'][$ticket['category']]) ? $hesk_settings['categories'][$ticket['category']] : $hesklang['catd'];
-			echo '<td class="category-'.intval($ticket['category']).'">'.$ticket['category_name'].'</td>';
+			$cells['category'] = '<span class="category-'.intval($ticket['category']).'">'.$ticket['category_name'].'</span>';
 		}
 
-		// Print customer name
+		// Customer name
 		if ( hesk_show_column('name') )
 		{
-			echo '<td>'.$ticket['name'].'</td>';
+			$cells['name'] = $ticket['name'];
 		}
 
-		// Print customer email
+		// Customer email
 		if ( hesk_show_column('email') )
 		{
-			echo '<td>' . (strlen($ticket['email']) ? '<a href="mailto:'.$ticket['email'].'">'.$hesklang['clickemail'].'</a>' : '') . '</td>';
+			$cells['email'] = strlen($ticket['email']) ? '<a href="mailto:'.$ticket['email'].'">'.$ticket['email'].'</a>' : '';
 		}
 
-		// Print subject and link to the ticket page
+		// Subject linked to the ticket page
 		if ( hesk_show_column('subject') )
 		{
-			echo '<td class="subject">'.($ticket['archive'] ? '<svg class="icon icon-tag '.($ticket['owner'] != $_SESSION['id'] ? 'fill-gray' : '').'" style="margin-right: 3px">
+			$cells['subject'] = ($ticket['archive'] ? '<svg class="icon icon-tag '.($ticket['owner'] != $_SESSION['id'] ? 'fill-gray' : '').'" style="margin-right: 3px">
                         <use xlink:href="'. HESK_PATH .'img/sprite.svg#icon-tag"></use>
-                    </svg>' : '').$owner.'<a class="link" href="admin_ticket.php?track='.$ticket['trackid'].'&amp;Refresh='.$random.'">'.$ticket['subject'].'</a></td>';
+                    </svg>' : '').$owner.'<a class="link" href="'.$ticket_link.'">'.$ticket['subject'].'</a>';
 		}
 
-		// Print ticket status
+		// Ticket status
 		if ( hesk_show_column('status') )
 		{
-            echo '<td>' . hesk_get_admin_ticket_status($ticket['status']) . '&nbsp;</td>';
+            $cells['status'] = '<span class="ut-status">' . hesk_get_admin_ticket_status($ticket['status']) . '</span>';
 		}
 
-		// Print ticket owner
+		// Ticket owner
 		if ( hesk_show_column('owner') )
 		{
 			if ($ticket['owner'])
 			{
-				$ticket['owner'] = isset($admins[$ticket['owner']]) ? $admins[$ticket['owner']] : $hesklang['unas'];
+				$owner_name = isset($admins[$ticket['owner']]) ? $admins[$ticket['owner']] : $hesklang['unas'];
+				$cells['owner'] = '<span class="ut-owner"><span class="ut-avatar">'.hesk_ut_initials($owner_name).'</span><span>'.$owner_name.'</span></span>';
 			}
 			else
 			{
-				$ticket['owner'] = $hesklang['unas'];
+				$cells['owner'] = '<span class="ut-owner is-unassigned"><span class="ut-avatar">&ndash;</span><span>'.$hesklang['unas'].'</span></span>';
 			}
-			echo '<td>'.$ticket['owner'].'</td>';
 		}
 
-		// Print number of all replies
+		// Number of all replies
 		if ( hesk_show_column('replies') )
 		{
-			echo '<td>'.$ticket['replies'].'</td>';
+			$cells['replies'] = $ticket['replies'];
 		}
 
-		// Print number of staff replies
+		// Number of staff replies
 		if ( hesk_show_column('staffreplies') )
 		{
-			echo '<td>'.$ticket['staffreplies'].'</td>';
+			$cells['staffreplies'] = $ticket['staffreplies'];
 		}
 
-		// Print last replier
+		// Last replier
 		if ( hesk_show_column('lastreplier') )
 		{
 			if ($ticket['lastreplier'])
@@ -530,38 +523,72 @@ if (true)
             {
 				$ticket['repliername'] = $ticket['name'];
 			}
-			echo '<td>'.$ticket['repliername'].'</td>';
+			$cells['lastreplier'] = $ticket['repliername'];
 		}
 
-		// Print time worked
+		// Time worked
 		if ( hesk_show_column('time_worked') )
 		{
-			echo '<td>'.$ticket['time_worked'].'</td>';
+			$cells['time_worked'] = $ticket['time_worked'];
 		}
 
-		// Print due date
+		// Due date, flagged when overdue or due soon (ignored for resolved tickets)
         if (hesk_show_column('due_date')) {
             $due_date = $hesklang['none'];
+            $due_class = '';
+            $due_note = '';
             if ($ticket['due_date'] != null) {
                 $due_date = hesk_date($ticket['due_date'], false, true, false);
                 $due_date = date($hesk_settings['format_date'], $due_date);
+
+                $due_ts = strtotime($ticket['due_date']);
+                if ($ticket['status'] != 3 && $due_ts < $mysql_time) {
+                    $due_class = ' is-overdue';
+                    $due_note = $hesklang['ql_ovr'];
+                } elseif ($ticket['status'] != 3 && $due_ts < $mysql_time + 86400 * intval($hesk_settings['due_soon'])) {
+                    $due_class = ' is-due-soon';
+                    $due_note = $hesklang['ql_due'];
+                }
             }
 
-            echo '<td>'.$due_date.'</td>';
+            $cells['due_date'] = '<span class="ut-due'.$due_class.'">'.$due_date.($due_note ? '<small>'.$due_note.'</small>' : '').'</span>';
         }
 
-		// Print custom fields
+		// Custom fields
 		foreach ($hesk_settings['custom_fields'] as $key => $value)
 		{
 			if ($value['use'] && hesk_show_column($key) )
             {
-				echo '<td>'.($value['type'] == 'date' ? hesk_custom_date_display_format($ticket[$key], $value['value']['date_format']) : $ticket[$key]).'</td>';
+				$cells[$key] = ($value['type'] == 'date' ? hesk_custom_date_display_format($ticket[$key], $value['value']['date_format']) : $ticket[$key]);
             }
+		}
+
+		// Start ticket row
+		echo '
+		<tr title="'.$ticket['message'].'" class="ut-prio-'.$ticket['priority'].' status-'. $ticket['status'] .' '.($ticket['owner'] ? '' : 'new').'">
+		<td class="table__first_th sindu_handle">
+            <div class="checkbox-custom">
+                <input type="checkbox" id="ticket_check_'.$ticket['id'].'" name="id[]" value="'.$ticket['id'].'" class="group' . $hesk_settings['hesk-group-count'] . '">
+                <label for="ticket_check_'.$ticket['id'].'">&nbsp;</label>
+            </div>
+        </td>
+		';
+
+		foreach (hesk_ut_list_columns() as $column)
+		{
+			if (isset($column['group']))
+			{
+				echo hesk_ut_group_cell($column, $cells, $ticket);
+			}
+			elseif (isset($cells[$column['field']]))
+			{
+				echo '<td class="ut-col-'.$column['field'].'">'.$cells[$column['field']].'</td>';
+			}
 		}
 
 		// End ticket row
 		echo '
-		<td>
+		<td class="ut-col-priority">
 		    <div class="dropdown priority" data-value="' . $ticket['priority'] . '" style="cursor: default">
                 <div class="label" style="cursor: default">
                     <span>' . $hesklang[$ticket['priority']] . '</span>
@@ -835,7 +862,7 @@ function hesk_print_list_head()
     }
 	?>
     <div class="table-wrap">
-	<table class="table sindu-table ticket-list sindu_origin_table" id="default-table">
+	<table class="table sindu-table ticket-list ut-list sindu_origin_table" id="default-table">
     <thead>
     <tr>
         <th class="table__first_th sindu_handle">
@@ -853,16 +880,28 @@ function hesk_print_list_head()
             $sort_direction = 'asc';
         }
 
-        foreach ($hesk_settings['ticket_list'] as $field)
+        foreach (hesk_ut_list_columns() as $column)
         {
-            if (!key_exists($field, $hesk_settings['possible_ticket_list'])) {
+            // Grouped column: one header with a sort link for each field inside it
+            if (isset($column['group']))
+            {
+                echo '<th class="ut-th-group">
+                    <span class="ut-th-label">' . $column['label'] . '</span>
+                    <div class="ut-th-sorts">';
+                foreach ($column['fields'] as $field)
+                {
+                    echo '<a class="' . ($sort == $field ? 'is-active ' . $sort_direction : '') . '" href="' . $href . '?' . $query . $sort_possible[$field] . '&amp;sort=' . $field . '">' . hesk_ut_field_label($field) . '</a>';
+                }
+                echo '</div>
+                </th>';
                 continue;
             }
 
+            $field = $column['field'];
             echo '<th class="sindu-handle '.($sort == $field ? $sort_direction : '').' '.($field == 'trackid' ? 'trackid' : '').'">
                 <a href="' . $href . '?' . $query . $sort_possible[$field] . '&amp;sort=' . $field . '">
                     <div class="sort">
-                        <span>' . $hesk_settings['possible_ticket_list'][$field] . '</span>
+                        <span>' . hesk_ut_field_label($field) . '</span>
                         <i class="handle"></i>
                     </div>
                 </a>
@@ -882,6 +921,132 @@ function hesk_print_list_head()
     <tbody>
 	<?php
 } // END hesk_print_list_head()
+
+
+/*
+ * Compact ticket list: related columns are merged into a single cell.
+ * Returns the columns to print, in the order configured in ticket_list.
+ * Each item is array('field' => x) or array('group' => g, 'label' => ..., 'fields' => array(...)).
+ */
+function hesk_ut_list_columns()
+{
+	global $hesk_settings, $hesklang;
+	static $columns = null;
+
+	if ($columns !== null)
+	{
+		return $columns;
+	}
+
+	$groups = array(
+		'ticket' => array('label' => $hesklang['ticket'], 'fields' => array('id', 'trackid', 'lastchange', 'dt', 'subject', 'category')),
+		'client' => array('label' => rtrim($hesklang['name'], ': '), 'fields' => array('name', 'email', 'lastreplier')),
+	);
+
+	$visible = array();
+	foreach ($hesk_settings['ticket_list'] as $field)
+	{
+		if (key_exists($field, $hesk_settings['possible_ticket_list']))
+		{
+			$visible[] = $field;
+		}
+	}
+
+	$columns = array();
+	$printed = array();
+	foreach ($visible as $field)
+	{
+		if (isset($printed[$field]))
+		{
+			continue;
+		}
+
+		foreach ($groups as $group => $info)
+		{
+			if ( ! in_array($field, $info['fields']))
+			{
+				continue;
+			}
+
+			// Group is placed where its first visible field is; a group with a single field stays a normal column
+			$fields = array_values(array_intersect($info['fields'], $visible));
+			if (count($fields) > 1)
+			{
+				foreach ($fields as $f)
+				{
+					$printed[$f] = true;
+				}
+				$columns[] = array('group' => $group, 'label' => $info['label'], 'fields' => $fields);
+				continue 2;
+			}
+		}
+
+		$printed[$field] = true;
+		$columns[] = array('field' => $field);
+	}
+
+	return $columns;
+} // END hesk_ut_list_columns()
+
+
+function hesk_ut_field_label($field)
+{
+	global $hesk_settings;
+
+	return rtrim($hesk_settings['possible_ticket_list'][$field], ': ');
+} // END hesk_ut_field_label()
+
+
+function hesk_ut_group_cell($column, $cells, $ticket)
+{
+	global $hesklang;
+
+	$fields = array_flip($column['fields']);
+
+	if ($column['group'] == 'ticket')
+	{
+		$meta = array();
+		if (isset($fields['id']))
+		{
+			$meta[] = '<span class="ut-id">#'.$cells['id'].'</span>';
+		}
+		if (isset($fields['trackid']))
+		{
+			$meta[] = '<span title="'.hesk_ut_field_label('trackid').'">'.$cells['trackid'].'</span>';
+		}
+		if (isset($fields['lastchange']))
+		{
+			$meta[] = '<span>'.hesk_ut_field_label('lastchange').' '.$cells['lastchange'].'</span>';
+		}
+		if (isset($fields['dt']))
+		{
+			$meta[] = '<span>'.hesk_ut_field_label('dt').' '.$cells['dt'].'</span>';
+		}
+
+		return '<td class="ut-col-ticket">'
+			. (count($meta) ? '<div class="ut-meta">'.implode('<i>&middot;</i>', $meta).'</div>' : '')
+			. (isset($fields['subject']) ? '<div class="ut-subject">'.$cells['subject'].'</div>' : '')
+			. (isset($fields['category']) ? '<div class="ut-category" title="'.strip_tags($cells['category']).'">'.$cells['category'].'</div>' : '')
+			. '</td>';
+	}
+
+	// Client: name, e-mail and last replier (only when someone other than the client replied last)
+	$html = '<td class="ut-col-client">';
+	if (isset($fields['name']))
+	{
+		$html .= '<div class="ut-client-name">'.$cells['name'].'</div>';
+	}
+	if (isset($fields['email']) && strlen($cells['email']))
+	{
+		$html .= '<div class="ut-small">'.$cells['email'].'</div>';
+	}
+	if (isset($fields['lastreplier']) && ( ! isset($fields['name']) || $cells['lastreplier'] != $cells['name']))
+	{
+		$html .= '<div class="ut-small">'.hesk_ut_field_label('lastreplier').': '.$cells['lastreplier'].'</div>';
+	}
+	return $html.'</td>';
+} // END hesk_ut_group_cell()
+
 
 
 function hesk_time_since($original)

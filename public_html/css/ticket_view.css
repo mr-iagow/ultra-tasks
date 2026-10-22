@@ -1,0 +1,572 @@
+/* UltraTasks - ticket page (admin_ticket.php). Only applies inside .ut-ticket */
+
+/* ---------- Layout ---------- */
+
+.ut-ticket.main__content.ticket {
+    align-items: flex-start;
+    padding: 20px 28px 50px 20px;
+}
+
+.ut-ticket .ticket__body {
+    max-width: 1100px !important;
+    min-width: 0;
+    margin-right: 20px;
+}
+
+.ut-ticket .ticket__params {
+    width: 340px;
+    position: sticky;
+    top: 16px;
+}
+
+.ut-ticket .ticket__body_block {
+    border: 1px solid var(--ut-line);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    padding: 20px 24px;
+    text-align: left;
+    margin-bottom: 14px;
+}
+
+.ut-section-label {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--ut-muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin: 20px 0 10px;
+}
+
+/* ---------- Header ---------- */
+
+.ut-crumbs {
+    font-size: 12px;
+    color: var(--ut-muted);
+    margin-bottom: 6px;
+}
+
+.ut-crumbs a {
+    color: var(--ut-purple);
+    text-decoration: none;
+}
+
+.ut-crumbs a:hover {
+    text-decoration: underline;
+}
+
+.ut-ticket .original-message h3 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 10px;
+    text-transform: none;
+}
+
+.ut-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    font-size: 13px;
+    color: var(--ut-muted);
+}
+
+.ut-summary b {
+    color: var(--ut-text);
+}
+
+.ut-summary .priority0,
+.ut-summary .priority1,
+.ut-summary .priority2,
+.ut-summary .priority3 {
+    font-weight: 700;
+    color: var(--ut-text);
+}
+
+.ut-summary__due.is-overdue {
+    color: var(--ut-critical);
+    font-weight: 700;
+}
+
+.ut-summary time {
+    color: var(--ut-text);
+}
+
+.ut-contact {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 10px 32px;
+    margin-top: 16px;
+    padding: 12px 16px;
+    background: #fafbfc;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    font-size: 13px;
+}
+
+.ut-ticket .ut-contact .block--head {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    min-height: 0;
+}
+
+.ut-ticket .ut-contact .block--head .contact {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.ut-ticket .ut-contact .block--head .contact > span,
+.ut-contact__item .custom-field-title {
+    display: block;
+    font-size: 11px;
+    color: var(--ut-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    margin: 0 0 2px;
+}
+
+.ut-ticket .ut-contact .block--head .contact .dropdown label span {
+    color: var(--ut-purple);
+    font-weight: 700;
+}
+
+.ut-contact__item span:last-child {
+    color: var(--ut-text);
+}
+
+/* ---------- Message as a sheet ---------- */
+
+.ut-ticket .original-message .block--description {
+    margin-top: 0;
+    padding: 0;
+}
+
+.ut-fields {
+    display: grid;
+    grid-template-columns: minmax(160px, 260px) 1fr;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.ut-fields__k,
+.ut-fields__v {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--ut-line);
+    line-height: 1.4;
+}
+
+.ut-fields > div:nth-last-child(-n+2) {
+    border-bottom: 0;
+}
+
+.ut-fields__k {
+    background: #fafbfc;
+    color: var(--ut-muted);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.ut-fields__v {
+    font-weight: 600;
+    color: var(--ut-text);
+    word-break: break-word;
+}
+
+.ut-fields__v.is-highlight {
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--ut-purple);
+}
+
+.ut-ticket .original-message .block--description p {
+    margin: 0 0 10px;
+}
+
+.ut-ticket .original-message .block--description > p {
+    padding: 10px 14px;
+    border-left: 3px solid var(--ut-high);
+    background: #fffbea;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+@media screen and (max-width: 900px) {
+    .ut-fields {
+        grid-template-columns: 1fr;
+    }
+    .ut-fields__k {
+        border-bottom: 0;
+        padding-bottom: 2px;
+    }
+}
+
+/* ---------- Attachments as chips ---------- */
+
+.ut-ticket .ticket__body_block .block--uploads {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 0;
+    border: 0;
+}
+
+.ut-file {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 13px;
+    background: #fff;
+}
+
+.ut-file a.underline {
+    color: var(--ut-purple);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ut-file a.underline:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Internal notes ---------- */
+
+.ut-ticket .ticket__body_block .block--notes .note {
+    background: #fffbea;
+    border: 1px solid #f3e3a6;
+    border-radius: 10px;
+}
+
+/* ---------- Replies ---------- */
+
+.ut-ticket .ticket__body_block.response {
+    background: var(--ut-purple-soft);
+    border-color: #e2d3ee;
+}
+
+.ut-ticket .ticket__body_block .block--head .contact {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ut-ticket .ticket__body_block .block--head .ut-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+    margin-right: 6px;
+    background: #e5e7eb;
+    color: var(--ut-muted);
+}
+
+.ut-ticket .ticket__body_block.response .block--head .ut-avatar {
+    background: var(--ut-purple);
+    color: #fff;
+}
+
+.ut-ticket .ticket__body_block .block--description {
+    padding-left: 44px;
+}
+
+.ut-ticket .original-message .block--description {
+    padding-left: 0;
+}
+
+.ut-ticket .ticket__replies .ticket__replies_link {
+    display: inline-flex;
+    margin: 0 auto 14px;
+    background: #fff;
+    border: 1px solid var(--ut-line);
+    border-radius: 16px;
+    padding: 6px 14px;
+    color: var(--ut-purple);
+    font-weight: 700;
+}
+
+.ut-ticket .ticket__replies {
+    text-align: center;
+}
+
+.ut-ticket .ticket__replies_list {
+    text-align: left;
+}
+
+/* ---------- Reply form ---------- */
+
+.ut-reply-form .block--timer {
+    margin-bottom: 12px;
+}
+
+.ut-reply-form .time-and-canned {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+.ut-reply-form .time-and-canned .block--timer {
+    margin: 0;
+}
+
+.ut-reply-form .block--message textarea {
+    border-radius: 8px;
+}
+
+.ut-reply-form .attachments {
+    margin-top: 12px;
+}
+
+.ut-reply-form .attachments .block--attach {
+    display: none;
+}
+
+.ut-reply-form .dropzone {
+    min-height: 0;
+    padding: 10px 14px;
+    border: 1.5px dashed #c9b5d8;
+    border-bottom: 0;
+    border-radius: 8px 8px 0 0;
+    background: #fff;
+    font-size: 13px;
+    color: var(--ut-muted);
+}
+
+.ut-reply-form .dropzone .dz-message {
+    margin: 0;
+}
+
+.ut-reply-form .fileinput-button {
+    width: 100%;
+    height: 38px;
+    min-height: 0;
+    border-radius: 0 0 8px 8px;
+    background: var(--ut-purple-soft);
+    border: 1.5px dashed #c9b5d8;
+    border-top: 0;
+    color: var(--ut-purple);
+    font-size: 13px;
+}
+
+.ut-reply-form .fileinput-button:hover {
+    background: #eee2f6;
+}
+
+.ut-reply-form .attachments > a.link {
+    display: inline-block;
+    margin-top: 6px;
+    font-size: 12px;
+}
+
+.ut-reply-form .block--checkboxs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 24px;
+    margin-top: 16px;
+}
+
+.ut-reply-form .block--checkboxs .checkbox-custom {
+    margin: 0;
+    font-size: 13px;
+}
+
+.ut-reply-form .block--submit {
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--ut-line);
+}
+
+/* "Save and continue later" on the left, send buttons on the right */
+.ut-reply-form .block--submit input[name="save_reply"] {
+    order: -1;
+    margin-right: auto;
+}
+
+.ut-reply-form .block--submit .btn {
+    margin: 0;
+}
+
+@media screen and (max-width: 900px) {
+    .ut-reply-form .block--checkboxs {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ---------- Side panel ---------- */
+
+.ut-ticket .ticket__params .params--bar,
+.ut-ticket .ticket__params .params--block {
+    border: 1px solid var(--ut-line);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    margin-bottom: 14px;
+}
+
+.ut-ticket .ticket__params .params--bar {
+    overflow: visible;
+}
+
+.ut-ticket .ticket__params .params.params--block {
+    padding: 4px 0;
+}
+
+.ut-ticket .ticket__params .params.params--block > .row {
+    display: block;
+    padding: 10px 18px;
+    margin: 0;
+    border-bottom: 1px solid var(--ut-line);
+}
+
+.ut-ticket .ticket__params .params.params--block > .row:last-child {
+    border-bottom: 0;
+}
+
+.ut-ticket .ticket__params .params.params--block > .row > .title {
+    width: auto;
+    margin: 0 0 5px;
+    font-size: 11px;
+    color: var(--ut-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.ut-ticket .ticket__params .params.params--block > .row > .value,
+.ut-ticket .ticket__params .params.params--block > .row > form,
+.ut-ticket .ticket__params .params.params--block > .row > form .dropdown-select {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+}
+
+/* Action buttons sit right under the field they belong to */
+.ut-ticket .ticket__params .params.params--block > .row.ut-row-action {
+    padding-top: 0;
+    margin-top: -4px;
+}
+
+.ut-ticket .ticket__params .params.params--block > .row.ut-row-action > .title {
+    display: none;
+}
+
+.ut-ticket .ticket__params .params.params--block > .row.ts:has(+ .ut-row-action),
+.ut-ticket .ticket__params .params.params--block > .row:has(+ .ut-row-action) {
+    border-bottom: 0;
+}
+
+.ut-btn-sm.btn {
+    height: 32px;
+    min-height: 0;
+    padding: 0 12px;
+    font-size: 12px;
+    width: auto;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* Details */
+.ut-ticket .ticket__params .details .row {
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+/* Previous tickets */
+.ut-prev {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-bottom: 1px solid var(--ut-line);
+    color: var(--ut-text);
+    text-decoration: none;
+    font-size: 13px;
+}
+
+.ut-prev:hover .ut-prev__text {
+    color: var(--ut-purple);
+}
+
+.ut-prev__text small {
+    display: block;
+    font-size: 11px;
+    color: var(--ut-muted);
+    margin-top: 2px;
+}
+
+.ut-prev .ut-status > span {
+    font-size: 11px;
+    padding: 2px 8px;
+}
+
+.ut-prev-all {
+    display: block;
+    text-align: center;
+    padding-top: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--ut-purple);
+    text-decoration: none;
+}
+
+/* ---------- Adjustments ---------- */
+
+.ut-ticket .ut-contact .block--head .contact {
+    display: block;
+    padding: 0;
+    margin: 0;
+}
+
+.ut-ticket .ut-contact .block--head .contact .dropdown {
+    margin: 0;
+}
+
+.ut-ticket .ut-contact .block--head .contact .dropdown label {
+    padding: 0;
+    justify-content: flex-start;
+}
+
+.ut-reply-form .block--timer {
+    height: auto;
+    box-shadow: none;
+    background: none;
+    justify-content: flex-start;
+    padding: 0;
+    width: auto;
+}
+
+.ut-reply-form .block--submit {
+    justify-content: flex-start;
+}
+
+.ut-reply-form .block--submit .submit-us {
+    margin-left: 0;
+}
+
+.ut-ticket .ticket__params .details .row {
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+.ut-ticket .ticket__params .details .row .title {
+    width: 130px;
+    padding-right: 10px;
+}
+
+.ut-ticket .ut-contact .block--head {
+    display: block;
+    height: auto;
+}
+
+/* app.css adds a top margin to the original message head */
+.ut-ticket .ut-contact .block--head {
+    margin-top: 0 !important;
+}

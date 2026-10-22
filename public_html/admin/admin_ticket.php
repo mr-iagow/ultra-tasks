@@ -705,7 +705,7 @@ $options = array(
     3 => '<option value="3" '.($ticket['priority'] == 3 ? 'selected' : '').'>'.$hesklang['low'].'</option>'
 );
 ?>
-<div class="main__content ticket">
+<div class="main__content ticket ut-ticket">
     <div class="ticket__body" <?php echo ($hesk_settings['limit_width'] ? 'style="max-width:'.$hesk_settings['limit_width'].'px"' : ''); ?>>
 
         <?php if ($hesk_settings['new_top'] && $ticket['replies']): ?>
@@ -899,6 +899,7 @@ $options = array(
         ?>
         <article class="ticket__body_block original-message">
             <?php if ( ! $hesk_settings['new_top'] || ($hesk_settings['new_top'] && ! $ticket['replies'])): ?>
+            <div class="ut-crumbs"><a href="admin_main.php">&larr; <?php echo $hesklang['tickets']; ?></a> / <?php echo $category['name']; ?></div>
             <h3>
                 <?php if ($ticket['archive']): ?>
                     <div class="tooltype right out-close">
@@ -929,6 +930,25 @@ $options = array(
                 <?php echo $ticket['subject']; ?>
             </h3>
             <?php endif; ?>
+            <?php
+            // Summary line: number, tracking ID, status, priority, due date and age
+            $ut_priorities = array(0 => 'critical', 1 => 'high', 2 => 'medium', 3 => 'low');
+            $ut_due = '';
+            if ($ticket['due_date'] != null) {
+                $ut_due_ts = strtotime($ticket['due_date']);
+                $ut_is_late = $ticket['status'] != 3 && $ut_due_ts < hesk_dbTime();
+                $ut_due = '<span class="ut-summary__due'.($ut_is_late ? ' is-overdue' : '').'">'.$hesklang['due_date'].' '.hesk_format_due_date(hesk_date($ticket['due_date'], true, true, false), false).($ut_is_late ? ' &middot; '.$hesklang['ql_ovr'] : '').'</span>';
+            }
+            ?>
+            <div class="ut-summary">
+                <?php if ($hesk_settings['sequential']): ?><b>#<?php echo $ticket['id']; ?></b><?php endif; ?>
+                <span><?php echo $hesklang['trackID']; ?> <b><?php echo $trackingID; ?></b></span>
+                <span class="ut-status"><?php echo hesk_get_admin_ticket_status($ticket['status']); ?></span>
+                <span class="priority<?php echo intval($ticket['priority']); ?>"><?php echo $hesklang[$ut_priorities[intval($ticket['priority'])]]; ?></span>
+                <?php echo $ut_due; ?>
+                <span><?php echo $hesklang['created_on']; ?> <time class="timeago tooltip" datetime="<?php echo date("c", strtotime($ticket['dt'])) ; ?>" title="<?php echo hesk_date($ticket['dt'], true); ?>"><?php echo hesk_date($ticket['dt'], true); ?></time></span>
+            </div>
+            <div class="ut-contact">
             <div class="block--head">
                 <div class="contact">
                     <span><?php echo $hesklang['contact']; ?>:</span>
@@ -1019,7 +1039,6 @@ $options = array(
                         </ul>
                     </div>
                 </div>
-                <time class="timeago tooltip" datetime="<?php echo date("c", strtotime($ticket['dt'])) ; ?>" title="<?php echo hesk_date($ticket['dt'], true); ?>"><?php echo hesk_date($ticket['dt'], true); ?></time>
             </div>
             <?php
             foreach ($hesk_settings['custom_fields'] as $k=>$v)
@@ -1035,19 +1054,21 @@ $options = array(
                     }
 
                     echo '
-					<div>
+					<div class="ut-contact__item">
                         <span class="custom-field-title">'.$v['name:'].'</span>
                         <span>'.$ticket[$k].'</span>
 					</div>';
                 }
             }
+            ?>
+            </div>
+            <?php
 
             if ($ticket['message_html'] != '')
             {
                 ?>
                 <div class="block--description browser-default">
-                    <p><?php echo $ticket['message_html']; ?></p>
-                    <p></p>
+                    <?php echo hesk_ut_message_fields($ticket['message_html']); ?>
                 </div>
                 <?php
             }
@@ -1121,6 +1142,9 @@ $options = array(
             <div class="block--notes">
                 <?php
                 $res = hesk_dbQuery("SELECT t1.*, t2.`name` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."notes` AS t1 LEFT JOIN `".hesk_dbEscape($hesk_settings['db_pfix'])."users` AS t2 ON t1.`who` = t2.`id` WHERE `ticket`='".intval($ticket['id'])."' ORDER BY t1.`id` " . ($hesk_settings['new_top'] ? 'DESC' : 'ASC') );
+                if (hesk_dbNumRows($res)) {
+                    echo '<div class="ut-section-label">'.$hesklang['ut_notes'].'</div>';
+                }
                 while ($note = hesk_dbFetchAssoc($res)) {
                     ?>
                     <div class="note">
@@ -1286,12 +1310,12 @@ $options = array(
         {
             if ($can_reply)
             {
-                $status_action = '[<a href="change_status.php?track='.$trackingID.'&amp;s=1&amp;Refresh='.$random.'&amp;token='.hesk_token_echo(0).'">'.$hesklang['open_action'].'</a>]';
+                $status_action = '<a class="btn btn--blue-border ut-btn-sm" href="change_status.php?track='.$trackingID.'&amp;s=1&amp;Refresh='.$random.'&amp;token='.hesk_token_echo(0).'">'.$hesklang['open_action'].'</a>';
             }
         }
         elseif ($can_resolve)
         {
-            $status_action = '[<a href="change_status.php?track='.$trackingID.'&amp;s=3&amp;Refresh='.$random.'&amp;token='.hesk_token_echo(0).'">'.$hesklang['close_action'].'</a>]';
+            $status_action = '<a class="btn btn-full ut-btn-sm" href="change_status.php?track='.$trackingID.'&amp;s=3&amp;Refresh='.$random.'&amp;token='.hesk_token_echo(0).'">&#10003; '.$hesklang['close_action'].'</a>';
         }
         ?>
     </div>
@@ -1324,7 +1348,7 @@ $options = array(
 
             <!-- Ticket one click open/resolve -->
             <?php if (strlen($status_action)): ?>
-            <div class="row">
+            <div class="row ut-row-action">
                 <div class="title">&nbsp;</div>
                 <div class="value center out-close">
                     <?php echo $status_action; ?>
@@ -1436,15 +1460,80 @@ $options = array(
 
             <!-- Ticket one click assign to self -->
             <?php if (!$ticket['owner'] && $can_assign_self): ?>
-            <div class="row">
+            <div class="row ut-row-action">
                 <div class="title">&nbsp;</div>
                 <div class="value center out-close">
-                    <?php echo '[<a class="link" href="assign_owner.php?track='.$trackingID.'&amp;owner='.$_SESSION['id'].'&amp;token='.hesk_token_echo(0).'&amp;unassigned=1">'.$hesklang['asss'].'</a>]'; ?>
+                    <?php echo '<a class="btn btn--blue-border ut-btn-sm" href="assign_owner.php?track='.$trackingID.'&amp;owner='.$_SESSION['id'].'&amp;token='.hesk_token_echo(0).'&amp;unassigned=1">'.$hesklang['asss'].'</a>'; ?>
                 </div>
             </div>
             <?php
             endif;
             ?>
+            <!-- Ticket due date -->
+                <div class="row">
+                    <div class="title"><?php echo $hesklang['due_date']; ?></div>
+                    <?php
+                    $hesk_settings['datepicker'] = array();
+                    $due_date = $hesklang['none'];
+                    $datepicker_due_date = '';
+                    if ($ticket['due_date'] != null) {
+                        $datepicker_due_date = hesk_date($ticket['due_date'], true, true, false);
+                        $hesk_settings['datepicker']['#new-due-date']['timestamp'] = $datepicker_due_date;
+                        $due_date = hesk_format_due_date($datepicker_due_date, false);
+                        $datepicker_due_date = hesk_datepicker_format_date($datepicker_due_date);
+                    }
+
+                    if ($can_due_date)
+                    {
+                        $hesk_settings['datepicker']['#new-due-date']['position'] = 'left bottom';
+                        ?>
+                        <div class="value">
+                            <a href="javascript:" onclick="hesk_toggleLayerDisplay('modifyduedate')" class="showme" id="toggleDP">
+                                <?php echo $due_date; ?>
+                            </a>
+                            <div id="modifyduedate" style="display:none">
+                                <form class="form" method="post" action="admin_ticket.php">
+                                    <section class="param calendar">
+                                        <div class="calendar--button" id="due-date-button">
+                                            <!--
+                                            <button type="button">
+                                                <svg class="icon icon-calendar">
+                                                    <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-calendar"></use>
+                                                </svg>
+                                            </button>
+                                            -->
+                                            <input name="new-due-date" id="new-due-date"
+                                                   data-datepicker-position="left top"
+                                                   value="<?php echo $datepicker_due_date; ?>"
+                                                   type="text" class="datepicker">
+                                        </div>
+                                        <div class="calendar--value pt10 pb10" style="<?php echo $datepicker_due_date == '' ? '' : 'display: block'; ?>;">
+                                            <span><?php echo $datepicker_due_date; ?></span>
+                                            <i class="close">
+                                                <svg class="icon icon-close">
+                                                    <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-close"></use>
+                                                </svg>
+                                            </i>
+                                        </div>
+                                    </section>
+                                    <button style="display: inline-flex; width: auto; height: 48px; padding: 0 16px" class="btn btn-full" type="submit"><?php echo $hesklang['save']; ?></button>
+                                    <a class="btn btn--blue-border" href="Javascript:void(0)" onclick="Javascript:hesk_toggleLayerDisplay('modifyduedate')"><?php echo $hesklang['cancel']; ?></a>
+                                    <input type="hidden" name="track" value="<?php echo $trackingID; ?>" />
+                                    <input type="hidden" name="token" value="<?php hesk_token_echo(); ?>" />
+                                    <input type="hidden" name="action" value="due_date">
+                                </form>
+                            </div>
+                        </div>
+                        <?php
+                    } else {
+                        ?>
+                        <div class="value">
+                            <?php echo $due_date; ?>
+                        </div>
+                        <?php
+                    }
+                    ?>
+                </div>
         </section>
         <section class="params--block details accordion visible">
             <h4 class="accordion-title">
@@ -1535,70 +1624,6 @@ $options = array(
                 <?php
                 }
                 ?>
-                <div class="row">
-                    <div class="title"><?php echo $hesklang['due_date']; ?></div>
-                    <?php
-                    $hesk_settings['datepicker'] = array();
-                    $due_date = $hesklang['none'];
-                    $datepicker_due_date = '';
-                    if ($ticket['due_date'] != null) {
-                        $datepicker_due_date = hesk_date($ticket['due_date'], true, true, false);
-                        $hesk_settings['datepicker']['#new-due-date']['timestamp'] = $datepicker_due_date;
-                        $due_date = hesk_format_due_date($datepicker_due_date, false);
-                        $datepicker_due_date = hesk_datepicker_format_date($datepicker_due_date);
-                    }
-
-                    if ($can_due_date)
-                    {
-                        $hesk_settings['datepicker']['#new-due-date']['position'] = 'left bottom';
-                        ?>
-                        <div class="value">
-                            <a href="javascript:" onclick="hesk_toggleLayerDisplay('modifyduedate')" class="showme" id="toggleDP">
-                                <?php echo $due_date; ?>
-                            </a>
-                            <div id="modifyduedate" style="display:none">
-                                <form class="form" method="post" action="admin_ticket.php">
-                                    <section class="param calendar">
-                                        <div class="calendar--button" id="due-date-button">
-                                            <!--
-                                            <button type="button">
-                                                <svg class="icon icon-calendar">
-                                                    <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-calendar"></use>
-                                                </svg>
-                                            </button>
-                                            -->
-                                            <input name="new-due-date" id="new-due-date"
-                                                   data-datepicker-position="left top"
-                                                   value="<?php echo $datepicker_due_date; ?>"
-                                                   type="text" class="datepicker">
-                                        </div>
-                                        <div class="calendar--value pt10 pb10" style="<?php echo $datepicker_due_date == '' ? '' : 'display: block'; ?>;">
-                                            <span><?php echo $datepicker_due_date; ?></span>
-                                            <i class="close">
-                                                <svg class="icon icon-close">
-                                                    <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-close"></use>
-                                                </svg>
-                                            </i>
-                                        </div>
-                                    </section>
-                                    <button style="display: inline-flex; width: auto; height: 48px; padding: 0 16px" class="btn btn-full" type="submit"><?php echo $hesklang['save']; ?></button>
-                                    <a class="btn btn--blue-border" href="Javascript:void(0)" onclick="Javascript:hesk_toggleLayerDisplay('modifyduedate')"><?php echo $hesklang['cancel']; ?></a>
-                                    <input type="hidden" name="track" value="<?php echo $trackingID; ?>" />
-                                    <input type="hidden" name="token" value="<?php hesk_token_echo(); ?>" />
-                                    <input type="hidden" name="action" value="due_date">
-                                </form>
-                            </div>
-                        </div>
-                        <?php
-                    } else {
-                        ?>
-                        <div class="value">
-                            <?php echo $due_date; ?>
-                        </div>
-                        <?php
-                    }
-                    ?>
-                </div>
             </div>
         </section>
         <?php
@@ -1612,7 +1637,7 @@ $options = array(
             $first_email = strpos($ticket['email'], ',') ? strtok($ticket['email'], ',') : $ticket['email'];
 
             // Get recent tickets, ordered by last change
-            $res = hesk_dbQuery("SELECT `trackid`, `status`, `subject` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets` WHERE ".hesk_myCategories()." AND ".hesk_myOwnership()." AND `id` <> ".$ticket['id']." AND `email` <> '' AND ".hesk_dbFormatEmail($first_email)." ORDER BY `lastchange` DESC LIMIT " . ($show_previous_tickets+1));
+            $res = hesk_dbQuery("SELECT `trackid`, `status`, `subject`, `lastchange` FROM `".hesk_dbEscape($hesk_settings['db_pfix'])."tickets` WHERE ".hesk_myCategories()." AND ".hesk_myOwnership()." AND `id` <> ".$ticket['id']." AND `email` <> '' AND ".hesk_dbFormatEmail($first_email)." ORDER BY `lastchange` DESC LIMIT " . ($show_previous_tickets+1));
             $past_num = hesk_dbNumRows($res);
             ?>
             <section class="params--block details accordion <?php if ($past_num > 0) echo 'visible'; ?>">
@@ -1632,19 +1657,18 @@ $options = array(
                             break;
                         }
                         ?>
-                        <div>
-                            <?php if (isset($hesk_settings['statuses'][$past_ticket['status']]['class'])): ?>
-                                <span class="dot bg-<?php echo $hesk_settings['statuses'][$past_ticket['status']]['class']; ?>" title="<?php echo $hesk_settings['statuses'][$past_ticket['status']]['name']; ?>"></span>
-                            <?php else: ?>
-                                <span class="dot" style="background-color:<?php echo $hesk_settings['statuses'][$past_ticket['status']]['color']; ?>" title="<?php echo $hesk_settings['statuses'][$past_ticket['status']]['name']; ?>"></span>
-                            <?php endif; ?>
-                            <a href="admin_ticket.php?track=<?php echo $past_ticket['trackid']; ?>&amp;Refresh=<?php echo rand(10000,99999); ?>"><?php echo $past_ticket['subject']; ?></a>
-                        </div>
+                        <a class="ut-prev" href="admin_ticket.php?track=<?php echo $past_ticket['trackid']; ?>&amp;Refresh=<?php echo rand(10000,99999); ?>">
+                            <span class="ut-prev__text">
+                                <?php echo $past_ticket['subject']; ?>
+                                <small><?php echo $past_ticket['trackid']; ?> &middot; <?php echo hesk_date($past_ticket['lastchange'], true, true, true, $hesk_settings['format_date']); ?></small>
+                            </span>
+                            <span class="ut-status"><?php echo hesk_get_admin_ticket_status($past_ticket['status']); ?></span>
+                        </a>
                         <?php
                     }
 
                     if ($past_num > 0 && $i > $show_previous_tickets) {
-                        echo '<br><a href="find_tickets.php?q='.urlencode($first_email).'&amp;what=email&amp;s_my=1&amp;s_ot=1&amp;s_un=1">'.$hesklang['all_previous'].'<a>';
+                        echo '<a class="ut-prev-all" href="find_tickets.php?q='.urlencode($first_email).'&amp;what=email&amp;s_my=1&amp;s_ot=1&amp;s_un=1">'.$hesklang['all_previous'].'</a>';
                     } elseif ($past_num == 0) {
                         echo sprintf($hesklang['no_previous'], hesk_htmlspecialchars($first_email));
                     }
@@ -1725,6 +1749,8 @@ function hesk_listAttachments($attachments='', $reply=0, $white=1)
 	{
 		list($att_id, $att_name) = explode('#', $myatt);
 
+        echo '<span class="ut-file">';
+
         /* Can edit and delete tickets? */
         if ($can_edit && $can_delete)
         {
@@ -1741,13 +1767,87 @@ function hesk_listAttachments($attachments='', $reply=0, $white=1)
                 <use xlink:href="'. HESK_PATH .'img/sprite.svg#icon-attach"></use>
             </svg>
         </a>
-		<a class="underline" title="'.$hesklang['dnl'].' '.$att_name.'" href="../download_attachment.php?att_id='.$att_id.'&amp;track='.$trackingID.'">'.$att_name.'</a><br />
+		<a class="underline" title="'.$hesklang['dnl'].' '.$att_name.'" href="../download_attachment.php?att_id='.$att_id.'&amp;track='.$trackingID.'">'.$att_name.'</a>
+        </span>
         ';
 	}
     echo '</div>';
 
     return true;
 } // End hesk_listAttachments()
+
+
+/*
+ * Shows "LABEL: value" lines of the message (typed in upper case, like the payment
+ * request forms) as a two column sheet. Same rule used in theme/hesk3/print-ticket.php;
+ * free text lines are printed as normal paragraphs.
+ */
+function hesk_ut_message_fields($message_html)
+{
+	global $hesklang;
+
+	$html = '';
+	$in_fields = false;
+	$has_fields = false;
+	$free = array();
+
+	foreach (preg_split('/<br\s*\/?>/i', $message_html) as $line)
+	{
+		$line = trim($line);
+		$plain = trim(strip_tags($line));
+
+		// Blank lines are just spacing from the editor
+		if ($plain === '')
+		{
+			continue;
+		}
+
+		$is_field = false;
+		if (preg_match('/^([\p{L}\p{N}][\p{L}\p{N} \/,.()?"\'\-$%]{0,80}):\s*(.*)$/u', $line, $matches))
+		{
+			$label = trim(strip_tags($matches[1]));
+			$is_field = ($label !== '' && $label === mb_strtoupper($label, 'UTF-8'));
+		}
+
+		if ($is_field)
+		{
+			// Consecutive free text lines are kept together in one paragraph
+			if (count($free))
+			{
+				$html .= '<p>'.implode('<br>', $free).'</p>';
+				$free = array();
+			}
+			if ( ! $in_fields)
+			{
+				$html .= '<div class="ut-fields">';
+				$in_fields = true;
+				$has_fields = true;
+			}
+			$is_value = (strpos($label, 'VALOR') === 0);
+			$html .= '<div class="ut-fields__k">'.$matches[1].'</div><div class="ut-fields__v'.($is_value ? ' is-highlight' : '').'">'.$matches[2].'</div>';
+		}
+		else
+		{
+			if ($in_fields)
+			{
+				$html .= '</div>';
+				$in_fields = false;
+			}
+			$free[] = $line;
+		}
+	}
+
+	if ($in_fields)
+	{
+		$html .= '</div>';
+	}
+	if (count($free))
+	{
+		$html .= '<p>'.implode('<br>', $free).'</p>';
+	}
+
+	return ($has_fields ? '<div class="ut-section-label">'.$hesklang['ut_request_data'].'</div>' : '') . $html;
+} // End hesk_ut_message_fields()
 
 
 function hesk_getAdminButtons($isReply=0,$white=1)
@@ -2078,6 +2178,7 @@ function hesk_printTicketReplies() {
         <article class="ticket__body_block <?php echo $reply['staffid'] ? 'response' : ''; ?>">
             <div class="block--head">
                 <div class="contact">
+                    <span class="ut-avatar"><?php echo hesk_ut_initials($reply['name']); ?></span>
                     <?php echo $hesklang['reply_by']; ?>
                     <b><?php echo $reply['name']; ?></b>
                     &raquo;
@@ -2122,6 +2223,7 @@ function hesk_printTicketReplies() {
         <article class="ticket__body_block <?php echo $reply['staffid'] ? 'response' : ''; ?>">
             <div class="block--head">
                 <div class="contact">
+                    <span class="ut-avatar"><?php echo hesk_ut_initials($reply['name']); ?></span>
                     <?php echo $hesklang['reply_by']; ?>
                     <b><?php echo $reply['name']; ?></b>
                     &raquo;
@@ -2180,6 +2282,7 @@ function hesk_printTicketReplies() {
         <article class="ticket__body_block <?php echo $reply['staffid'] ? 'response' : ''; ?>">
         <div class="block--head">
             <div class="contact">
+                <span class="ut-avatar"><?php echo hesk_ut_initials($reply['name']); ?></span>
                 <?php echo $hesklang['reply_by']; ?>
                 <b><?php echo $reply['name']; ?></b>
                 &raquo;
@@ -2233,7 +2336,7 @@ function hesk_printReplyForm() {
     }
 ?>
 <!-- START REPLY FORM -->
-<article class="ticket__body_block">
+<article class="ticket__body_block ut-reply-form">
     <form method="post" class="form" action="admin_reply_ticket.php" enctype="multipart/form-data" name="form1" onsubmit="force_stop();<?php if ($hesk_settings['staff_ticket_formatting'] != 2): ?>clearTimeout(typingTimer);<?php endif; ?>return true;">
         <?php
         /* Ticket assigned to someone else? */

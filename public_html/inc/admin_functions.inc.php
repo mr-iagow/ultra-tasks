@@ -47,6 +47,18 @@ function hesk_show_column($column)
 } // END hesk_show_column()
 
 
+function hesk_ut_initials($name)
+{
+	$parts = preg_split('/\s+/u', trim(strip_tags($name)));
+	$initials = hesk_mb_substr($parts[0], 0, 1);
+	if (count($parts) > 1)
+	{
+		$initials .= hesk_mb_substr(end($parts), 0, 1);
+	}
+	return hesk_mb_strtoupper($initials);
+} // END hesk_ut_initials()
+
+
 function hesk_getHHMMSS($in)
 {
 	$in = hesk_getTime($in);

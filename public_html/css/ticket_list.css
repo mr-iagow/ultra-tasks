@@ -1,0 +1,446 @@
+/* UltraTasks - compact ticket list, search form and "show tickets" form */
+
+:root {
+    --ut-purple: #662D8E;
+    --ut-purple-soft: #f6f0fa;
+    --ut-text: #26282a;
+    --ut-muted: #6b7480;
+    --ut-line: #e6e9ef;
+    --ut-critical: #e64342;
+    --ut-high: #f5b700;
+    --ut-medium: #38bc7d;
+    --ut-low: #b4bac6;
+}
+
+/* ---------- Search form (top) ---------- */
+
+.ut-find {
+    background: #fff;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 0 0 20px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.ut-find__bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px 16px;
+}
+
+.ut-find__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.ut-find__field > label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ut-muted);
+}
+
+.ut-find__bar .search-options {
+    width: 240px;
+}
+
+/* Same height for every control in the bar so they line up */
+.ut-find__bar .selectize-control,
+.ut-find__bar .dropdown-select {
+    width: 100%;
+    margin: 0;
+}
+
+.ut-find__bar .selectize-input,
+.ut-find__bar .dropdown-select .label,
+.ut-find__bar input.form-control {
+    box-sizing: border-box;
+    height: 40px;
+    min-height: 40px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.ut-find__actions .btn {
+    box-sizing: border-box;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.ut-find__query {
+    flex: 1 1 260px;
+}
+
+.ut-find__query .form-control {
+    width: 100%;
+}
+
+.ut-find__actions {
+    display: flex;
+    gap: 8px;
+}
+
+.ut-find__actions .btn {
+    margin: 0;
+    white-space: nowrap;
+    width: auto;
+}
+
+.ut-find__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ut-find__toggle .icon {
+    width: 10px;
+    height: 10px;
+    fill: currentColor;
+    transition: transform 200ms ease;
+}
+
+.ut-find__toggle.is-open .icon {
+    transform: rotate(180deg);
+}
+
+.ut-find__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 16px 20px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ut-line);
+}
+
+.ut-find__include {
+    grid-column: span 2;
+}
+
+.ut-find__include > label a {
+    margin-left: 8px;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.ut-find__include .checkbox-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+}
+
+.ut-find__inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--ut-muted);
+}
+
+.ut-find .ut-find__inline input.form-control {
+    width: 80px;
+    min-width: 0;
+    flex: 0 0 80px;
+}
+
+@media screen and (max-width: 900px) {
+    .ut-find__bar .search-options,
+    .ut-find__query {
+        width: 100%;
+        flex-basis: 100%;
+    }
+    .ut-find__include {
+        grid-column: auto;
+    }
+}
+
+/* ---------- Ticket list ---------- */
+
+.ut-list tbody td {
+    padding: 12px 14px;
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.ut-list tbody tr td:first-child {
+    box-shadow: inset 4px 0 0 var(--ut-low);
+}
+
+.ut-list tbody tr.ut-prio-critical td:first-child { box-shadow: inset 4px 0 0 var(--ut-critical); }
+.ut-list tbody tr.ut-prio-high td:first-child { box-shadow: inset 4px 0 0 var(--ut-high); }
+.ut-list tbody tr.ut-prio-medium td:first-child { box-shadow: inset 4px 0 0 var(--ut-medium); }
+
+/* Priority bar replaces the old "unassigned" bar and bold rows */
+.ut-list tbody tr.new td:first-child::before {
+    display: none;
+}
+
+.ut-list tbody tr.new td,
+.ut-list tbody tr.new .table__td-id a {
+    font-weight: normal;
+}
+
+.ut-list tbody tr:hover {
+    background-color: #faf7fc;
+}
+
+.ut-col-ticket {
+    min-width: 300px;
+}
+
+.ut-meta {
+    font-size: 12px;
+    color: var(--ut-muted);
+    margin-bottom: 3px;
+}
+
+.ut-meta i {
+    font-style: normal;
+    margin: 0 6px;
+}
+
+.ut-meta a {
+    color: var(--ut-purple);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ut-meta a:hover {
+    text-decoration: underline;
+}
+
+.ut-subject {
+    font-weight: 700;
+    line-height: 1.35;
+}
+
+.ut-subject a.link,
+.ut-col-subject a.link {
+    color: var(--ut-text);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.ut-subject a.link:hover,
+.ut-col-subject a.link:hover {
+    color: var(--ut-purple);
+    text-decoration: underline;
+}
+
+.ut-category {
+    font-size: 12px;
+    color: var(--ut-muted);
+    margin-top: 3px;
+    max-width: 520px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ut-client-name {
+    font-weight: 600;
+}
+
+.ut-small {
+    font-size: 12px;
+    color: var(--ut-muted);
+    margin-top: 2px;
+}
+
+.ut-status > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+    background: #f1f2f5;
+    background: color-mix(in srgb, currentColor 12%, #fff);
+}
+
+.ut-status > span::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.ut-owner {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.ut-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--ut-purple);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.ut-owner.is-unassigned {
+    color: var(--ut-muted);
+}
+
+.ut-owner.is-unassigned .ut-avatar {
+    background: #e5e7eb;
+    color: var(--ut-muted);
+}
+
+.ut-due {
+    white-space: nowrap;
+    font-size: 13px;
+}
+
+.ut-due small {
+    display: block;
+    font-size: 11px;
+    font-weight: 400;
+}
+
+.ut-due.is-overdue {
+    color: var(--ut-critical);
+    font-weight: 700;
+}
+
+.ut-due.is-due-soon {
+    color: #d97706;
+    font-weight: 700;
+}
+
+/* Grouped column header: label + sort links */
+.ut-list thead th.ut-th-group {
+    vertical-align: middle;
+}
+
+.ut-th-label {
+    display: block;
+}
+
+.ut-th-sorts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+    margin-top: 4px;
+}
+
+.ut-th-sorts a {
+    font-size: 10px;
+    font-weight: 400;
+    color: #959eb0;
+    text-decoration: none;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+.ut-th-sorts a:hover {
+    color: var(--ut-purple);
+}
+
+.ut-th-sorts a.is-active {
+    color: var(--ut-purple);
+    font-weight: 700;
+}
+
+.ut-th-sorts a.is-active.asc::after { content: " \25B2"; }
+.ut-th-sorts a.is-active.desc::after { content: " \25BC"; }
+
+/* ---------- "Show tickets" form (bottom) ---------- */
+
+.ut-section-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 12px;
+}
+
+.ut-show {
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.ut-show .search-option {
+    padding-bottom: 16px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid var(--ut-line);
+}
+
+.ut-show .search-name {
+    font-weight: 700;
+}
+
+.ut-show .search-name .plain_link {
+    font-weight: 400;
+    font-size: 13px;
+}
+
+.ut-show .search-options,
+.ut-show .search-options .checkbox-list {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+}
+
+.ut-show .checkbox-group.list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    max-width: 1100px;
+}
+
+@media screen and (max-width: 900px) {
+    .ut-show .checkbox-group.list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+.ut-show .checkbox-group.list .row {
+    display: contents;
+}
+
+.ut-show .checkbox-group.list .checkbox-custom {
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    background: #fafbfc;
+    transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.ut-show .checkbox-group.list .checkbox-custom:hover {
+    border-color: #c9b5d8;
+}
+
+.ut-show .checkbox-group.list .checkbox-custom:has(input:checked) {
+    background: var(--ut-purple-soft);
+    border-color: var(--ut-purple);
+}
+
+.ut-show .checkbox-group.list .checkbox-custom label {
+    width: 100%;
+    cursor: pointer;
+}
