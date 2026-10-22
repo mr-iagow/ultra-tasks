@@ -1,0 +1,341 @@
+/* UltraTasks - new ticket page (new_ticket.php). Only applies inside .ut-new */
+
+/* ---------- Layout ---------- */
+
+.ut-new.main__content {
+    padding: 20px 28px 50px 20px;
+}
+
+.ut-new__wrap {
+    max-width: 1460px;
+}
+
+.ut-new__wrap--narrow {
+    max-width: 820px;
+}
+
+.ut-new__head {
+    margin-bottom: 16px;
+}
+
+.ut-new__title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ut-text);
+    margin: 0 0 4px;
+}
+
+.ut-new__req {
+    font-size: 13px;
+    color: var(--ut-muted);
+    margin: 0;
+}
+
+.ut-new .notice-flash {
+    padding: 0;
+    margin: 0 0 14px;
+}
+
+.ut-new .notice-flash .notification {
+    margin: 0;
+}
+
+.ut-new__form {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.ut-new__main {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.ut-new__side {
+    flex: 0 0 340px;
+    width: 340px;
+    position: sticky;
+    top: 16px;
+}
+
+.ut-new__card {
+    background: #fff;
+    border: 1px solid var(--ut-line);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+    padding: 20px 24px;
+    margin-bottom: 14px;
+}
+
+.ut-new__card > .ut-section-label:first-child {
+    margin-top: 0;
+}
+
+.ut-new .form-group label,
+.ut-new .param.calendar label {
+    font-size: 13px;
+    color: var(--ut-muted);
+}
+
+/* ---------- Category chip ---------- */
+
+.ut-new__category {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.ut-new__category-label {
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--ut-muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.ut-new__category .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    min-height: 36px;
+    padding: 6px 14px;
+    text-align: left;
+    white-space: normal;
+}
+
+.ut-new__category .btn .icon {
+    flex: 0 0 auto;
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+}
+
+/* ---------- Two-column field grid ---------- */
+
+.ut-new__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 20px;
+    align-items: start;
+}
+
+.ut-new__grid > .form-group,
+.ut-new__grid > .param.calendar {
+    min-width: 0;
+    margin-bottom: 16px;
+}
+
+/* Long fields use the whole row */
+.ut-new__grid > .form-group:has(textarea),
+.ut-new__grid > .form-group:has(.radio-list),
+.ut-new__grid > .form-group:has(.checkbox-custom),
+.ut-new__grid > [id$="_suggestions"] {
+    grid-column: 1 / -1;
+}
+
+.ut-new__grid > [id$="_suggestions"]:empty {
+    display: none;
+}
+
+/* Date fields: label on top, picker below, same rhythm as the inputs */
+.ut-new__grid > .param.calendar {
+    flex-wrap: wrap;
+    align-self: start;
+}
+
+.ut-new__grid > .param.calendar > label {
+    flex: 0 0 100%;
+    margin: 0 0 4px;
+}
+
+/* ---------- Templates, subject and message ---------- */
+
+.ut-new__tpl {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0 32px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    background: #fafbfc;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+}
+
+.ut-new__tpl .form-group {
+    margin-bottom: 0;
+}
+
+.ut-new__tpl .radio-list {
+    display: flex;
+    gap: 4px 20px;
+    flex-wrap: wrap;
+}
+
+.ut-new__tpl .radio-custom {
+    margin-bottom: 0 !important;
+}
+
+.ut-new #HeskSub,
+.ut-new #HeskMsg {
+    display: block;
+}
+
+.ut-new #message {
+    min-height: 220px;
+}
+
+/* ---------- Attachments ---------- */
+
+.ut-new .attachments {
+    margin: 0;
+}
+
+.ut-new .attachments .block--attach {
+    margin-bottom: 10px;
+}
+
+.ut-new .attachments .dropzone,
+.ut-new .attachments .btn {
+    max-width: none;
+    width: 100%;
+}
+
+/* ---------- Side panel ---------- */
+
+.ut-new__side .form-group {
+    margin-bottom: 14px;
+}
+
+.ut-new__side .param.calendar {
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+}
+
+.ut-new__side .param.calendar > label {
+    flex: 0 0 100%;
+    margin: 0 0 4px;
+}
+
+/* selectize sets an inline width; the side panel fields use the full width */
+.ut-new__side .selectize-control,
+.ut-new__side .selectize-control .selectize-input {
+    box-sizing: border-box;
+    width: 100% !important;
+}
+
+.ut-new__side .checkbox-custom {
+    margin-top: 6px;
+}
+
+.ut-new__submit {
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid var(--ut-line);
+}
+
+.ut-new__submit .btn {
+    width: 100%;
+    height: 44px;
+}
+
+/* ---------- Category picker (first step) ---------- */
+
+.ut-catpick__field {
+    position: relative;
+    margin-bottom: 14px;
+}
+
+.ut-catpick__field .icon-search {
+    position: absolute;
+    left: 14px;
+    top: 13px;
+    width: 16px;
+    height: 16px;
+    fill: var(--ut-muted);
+    pointer-events: none;
+}
+
+.ut-catpick__field #category_search {
+    box-sizing: border-box;
+    width: 100%;
+    height: 42px;
+    padding: 0 14px 0 40px;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.ut-catpick__field #category_search:focus {
+    border-color: var(--ut-purple);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ut-purple-soft);
+}
+
+.ut-catpick__list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    max-height: 360px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    background: #fff;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(38, 40, 42, .12);
+}
+
+.ut-catpick__list li {
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--ut-text);
+    cursor: pointer;
+}
+
+.ut-catpick__list li:hover {
+    background: var(--ut-purple-soft);
+}
+
+.ut-catpick__list li.is-selected {
+    background: var(--ut-purple-soft);
+    color: var(--ut-purple);
+    font-weight: 700;
+}
+
+.ut-catpick .btn {
+    width: auto;
+    padding: 0 24px;
+}
+
+/* ---------- Small screens ---------- */
+
+@media screen and (max-width: 1100px) {
+    .ut-new__form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .ut-new__side {
+        position: static;
+        width: auto;
+        flex-basis: auto;
+    }
+}
+
+@media screen and (max-width: 700px) {
+    .ut-new.main__content {
+        padding: 16px;
+    }
+    .ut-new__grid {
+        grid-template-columns: 1fr;
+    }
+}

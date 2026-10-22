@@ -246,51 +246,42 @@ if ( ! isset($_SESSION['as_status']))
     $_SESSION['as_status'] = 0;
 }
 ?>
-<div class="main__content categories ticket-create">
-    <div class="table-wrap">
+<div class="main__content categories ticket-create ut-new">
+    <div class="ut-new__wrap">
+
+        <div class="ut-new__head">
+            <div class="ut-crumbs"><a href="admin_main.php">&larr; <?php echo $hesklang['tickets']; ?></a> / <?php echo hesk_getCategoryName($category); ?></div>
+            <h1 class="ut-new__title"><?php echo $hesklang['nti2']; ?></h1>
+            <p class="ut-new__req"><?php echo $hesklang['req_marked_with']; ?> <span class="important">*</span></p>
+        </div>
 
         <?php
-        if ( ! isset($_SESSION['HESK_ERROR']))
+        // Category description: text of this category's "X - Descrição" custom fields
+        foreach ($hesk_settings['custom_fields'] as $k=>$v)
         {
-            // hesk_show_info($v['value']['default_value'], ' ', false);
-            if (strlen($k_value) != 0 || isset($_SESSION["as_$k"]))
-                {
-                    $v['value']['default_value'] = $k_value;
-                }
-
-                $cls = in_array($k,$_SESSION['iserror']) ? 'isError' : '';
-
-                    echo '<div class="main__content notice-flash">
-                            <div class="notification blue">
-                                '.$v['value']['default_value'].'
-                            </div>
-                        </div>';
-        ?>
-        <!-- <div class="main__content notice-flash">
-            <div class="notification blue">
-                <?php echo $v['value']['default_value']; ?>
-            </div>
-        </div> -->
-        <?php
+            if (hesk_ut_is_category_description($k, $v, $category) && strlen($v['value']['default_value']))
+            {
+                echo '<div class="main__content notice-flash">
+                        <div class="notification blue">
+                            '.$v['value']['default_value'].'
+                        </div>
+                    </div>';
+            }
         }
 
         /* This will handle error, success and notice messages */
         hesk_handle_messages();
         ?>
 
-        <h3 style="font-size: 1.3rem; margin-top: 10px"><?php echo $hesklang['nti2']; ?></h3>
-        <h4><?php echo $hesklang['req_marked_with']; ?> <span class="important">*</span></h4>
+        <form method="post" class="form ut-new__form <?php echo isset($_SESSION['iserror']) && count($_SESSION['iserror']) ? 'invalid' : ''; ?>" action="admin_submit_ticket.php" name="form1" id="submit-ticket" enctype="multipart/form-data">
 
-        <form method="post" class="form <?php echo isset($_SESSION['iserror']) && count($_SESSION['iserror']) ? 'invalid' : ''; ?>" action="admin_submit_ticket.php" name="form1" id="submit-ticket" enctype="multipart/form-data">
+          <div class="ut-new__main">
 
             <?php if ($number_of_categories > 1): ?>
-            <div class="form-group" style="margin-bottom: 0px;">
-                <label for="create_name" style="display: inline;">
-                    <?php echo $hesklang['category']; ?>:
-                </label>
-                &nbsp;
-                <button type="button" class="btn btn--blue-border change_category" name="cc-btn" id="cc-btn" title="<?php echo $hesklang['chg_cat']; ?>"><?php echo hesk_getCategoryName($category); ?>
-                    &nbsp;
+            <div class="ut-new__category">
+                <span class="ut-new__category-label"><?php echo $hesklang['category']; ?></span>
+                <button type="button" class="btn btn--blue-border change_category" name="cc-btn" id="cc-btn" title="<?php echo $hesklang['chg_cat']; ?>">
+                    <span><?php echo hesk_getCategoryName($category); ?></span>
                     <svg class="icon icon-edit">
                         <use xlink:href="../img/sprite.svg#icon-edit"></use>
                     </svg>
@@ -305,6 +296,10 @@ if ( ! isset($_SESSION['as_status']))
             </div>
             <?php endif; ?>
 
+            <!-- Requester and category fields -->
+            <section class="ut-new__card">
+            <h2 class="ut-section-label"><?php echo $hesklang['ut_new_info']; ?></h2>
+            <div class="ut-new__grid">
             <div class="form-group">
                 <label for="create_name">
                     <?php echo $hesklang['name']; ?>: <span class="important">*</span>
@@ -322,32 +317,6 @@ if ( ! isset($_SESSION['as_status']))
                     <?php if($hesk_settings['detect_typos']) { echo ' onblur="Javascript:hesk_suggestEmail(\'email\', \'email_suggestions\', 1, 1)"'; } ?>>
             </div>
             <div id="email_suggestions"></div>
-            <div class="form-group">
-                <label class="priority <?php if (in_array('priority',$_SESSION['iserror'])) {echo 'isErrorStr';} ?>"><?php echo $hesklang['priority']; ?>: <?php if ($hesk_settings['select_pri']) {echo '<span class="important">*</span>';} ?></label>
-                <div class="dropdown-select center out-close priority">
-                    <select name="priority">
-                        <?php
-                        // Show the "Click to select"?
-                        if ($hesk_settings['select_pri'])
-                        {
-                            echo '<option value="">'.$hesklang['select'].'</option>';
-                        }
-                        ?>
-                        <option value="3" <?php if(isset($_SESSION['as_priority']) && $_SESSION['as_priority']==3) {echo 'selected';} ?>><?php echo $hesklang['low']; ?></option>
-                        <option value="2" <?php if(isset($_SESSION['as_priority']) && $_SESSION['as_priority']==2) {echo 'selected';} ?>><?php echo $hesklang['medium']; ?></option>
-                        <option value="1" <?php if(isset($_SESSION['as_priority']) && $_SESSION['as_priority']==1) {echo 'selected';} ?>><?php echo $hesklang['high']; ?></option>
-                        <option value="0" <?php if(isset($_SESSION['as_priority']) && $_SESSION['as_priority']==0) {echo 'selected';} ?>><?php echo $hesklang['critical']; ?></option>
-                    </select>
-                </div>
-            </div>
-            <div class="form-group ts" id="ticket-status-div">
-                <label><?php echo $hesklang['status']; ?>:</label>
-                <div class="dropdown-select center out-close">
-                    <select id="status-select" name="status" onchange="hesk_update_status_color(this.value)">
-                        <?php echo hesk_get_status_select('', hesk_checkPermission('can_resolve', 0), $_SESSION['as_status']); ?>
-                    </select>
-                </div>
-            </div>
 
             <!-- START CUSTOM BEFORE -->
             <?php
@@ -356,6 +325,13 @@ if ( ! isset($_SESSION['as_status']))
             {
                 if ($v['use'] && $v['place']==0 && hesk_is_custom_field_in_category($k, $category) )
                 {
+                    // Category description: shown in the notice above, sent unchanged as a hidden field
+                    if (hesk_ut_is_category_description($k, $v, $category))
+                    {
+                        echo '<input type="hidden" name="'.$k.'" value="'.$v['value']['default_value'].'">';
+                        continue;
+                    }
+
                     $v['req'] = $v['req']==2 ? '<span class="important">*</span>' : '';
 
                     if ($v['type'] == 'checkbox')
@@ -577,6 +553,12 @@ if ( ! isset($_SESSION['as_status']))
             }
             ?>
             <!-- END CUSTOM BEFORE -->
+            </div>
+            </section>
+
+            <!-- Request: templates, subject, message and fields after the message -->
+            <section class="ut-new__card">
+            <h2 class="ut-section-label"><?php echo $hesklang['ut_new_message']; ?></h2>
             <?php
             // Lets handle ticket templates
             $can_options = '';
@@ -680,6 +662,7 @@ if ( ! isset($_SESSION['as_status']))
             if ( strlen($can_options) )
             {
                 ?>
+                <div class="ut-new__tpl">
                 <div class="form-group">
                     <label>
                         <?php echo $hesklang['ticket_tpl']; ?>
@@ -704,6 +687,7 @@ if ( ! isset($_SESSION['as_status']))
                             <?php echo $can_options; ?>
                         </select>
                     </div>
+                </div>
                 </div>
                 <?php
             } // END printing templates
@@ -732,11 +716,21 @@ if ( ! isset($_SESSION['as_status']))
                 hesk_tinymce_init('#message');
             }
 
+            ?>
+            <div class="ut-new__grid">
+            <?php
             /* custom fields AFTER comments */
             foreach ($hesk_settings['custom_fields'] as $k=>$v)
             {
                 if ($v['use'] && $v['place']==1 && hesk_is_custom_field_in_category($k, $category) )
                 {
+                    // Category description: shown in the notice above, sent unchanged as a hidden field
+                    if (hesk_ut_is_category_description($k, $v, $category))
+                    {
+                        echo '<input type="hidden" name="'.$k.'" value="'.$v['value']['default_value'].'">';
+                        continue;
+                    }
+
                     $v['req'] = $v['req']==2 ? '<span class="important">*</span>' : '';
 
                     if ($v['type'] == 'checkbox')
@@ -958,12 +952,15 @@ if ( ! isset($_SESSION['as_status']))
             }
             ?>
             <!-- END CUSTOM AFTER -->
+            </div>
+            </section>
 
             <?php
             /* attachments */
             if ($hesk_settings['attachments']['use']) {
                 require(HESK_PATH . 'inc/attachments.inc.php');
                 ?>
+                <section class="ut-new__card">
                 <div class="attachments">
                     <div class="block--attach">
                         <svg class="icon icon-attach">
@@ -979,28 +976,40 @@ if ( ! isset($_SESSION['as_status']))
                     dropzone_display_existing_files(hesk_SESSION_array('as_attachments'));
                     ?>
                 </div>
+                </section>
                 <?php
             }
-
-            // Admin options
-            if ( ! isset($_SESSION['as_notify']) )
-            {
-                $_SESSION['as_notify'] = $_SESSION['notify_customer_new'] ? 1 : 0;
-            }
             ?>
-            <div class="form-group" style="margin-top: 20px">
-                <label><?php echo $hesklang['addop']; ?>:</label>
-                <div class="checkbox-list">
-                    <div class="checkbox-custom">
-                        <input type="checkbox" id="create_notify1" name="notify" value="1" <?php echo empty($_SESSION['as_notify']) ? '' : 'checked'; ?>>
-                        <label for="create_notify1"><?php echo $hesklang['seno']; ?></label>
-                    </div>
-                    <?php if (hesk_checkPermission('can_view_tickets',0)): ?>
-                    <div class="checkbox-custom">
-                        <input type="checkbox" id="create_show1" name="show" value="1" <?php echo (!isset($_SESSION['as_show']) || !empty($_SESSION['as_show'])) ? 'checked' : ''; ?>>
-                        <label for="create_show1"><?php echo $hesklang['otas']; ?></label>
-                    </div>
-                    <?php endif; ?>
+          </div>
+
+          <!-- Side panel: classification, assignment, options and submit -->
+          <aside class="ut-new__side">
+            <section class="ut-new__card">
+            <h2 class="ut-section-label"><?php echo $hesklang['ut_new_settings']; ?></h2>
+            <div class="form-group">
+                <label class="priority <?php if (in_array('priority',$_SESSION['iserror'])) {echo 'isErrorStr';} ?>"><?php echo $hesklang['priority']; ?>: <?php if ($hesk_settings['select_pri']) {echo '<span class="important">*</span>';} ?></label>
+                <div class="dropdown-select center out-close priority">
+                    <select name="priority">
+                        <?php
+                        // Show the "Click to select"?
+                        if ($hesk_settings['select_pri'])
+                        {
+                            echo '<option value="">'.$hesklang['select'].'</option>';
+                        }
+                        ?>
+                        <option value="3" <?php if(isset($_SESSION['as_priority']) && $_SESSION['as_priority']==3) {echo 'selected';} ?>><?php echo $hesklang['low']; ?></option>
+                        <option value="2" <?php if(isset($_SESSION['as_priority']) && $_SESSION['as_priority']==2) {echo 'selected';} ?>><?php echo $hesklang['medium']; ?></option>
+                        <option value="1" <?php if(isset($_SESSION['as_priority']) && $_SESSION['as_priority']==1) {echo 'selected';} ?>><?php echo $hesklang['high']; ?></option>
+                        <option value="0" <?php if(isset($_SESSION['as_priority']) && $_SESSION['as_priority']==0) {echo 'selected';} ?>><?php echo $hesklang['critical']; ?></option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group ts" id="ticket-status-div">
+                <label><?php echo $hesklang['status']; ?>:</label>
+                <div class="dropdown-select center out-close">
+                    <select id="status-select" name="status" onchange="hesk_update_status_color(this.value)">
+                        <?php echo hesk_get_status_select('', hesk_checkPermission('can_resolve', 0), $_SESSION['as_status']); ?>
+                    </select>
                 </div>
             </div>
             <?php if ($can_due_date): ?>
@@ -1046,7 +1055,6 @@ if ( ! isset($_SESSION['as_status']))
                 </i>
                 </div>
             </section>
-            <br>
             <?php endif; ?>
             <?php if ($hesk_settings['can_sel_lang']): ?>
             <div class="form-group">
@@ -1118,22 +1126,42 @@ if ( ! isset($_SESSION['as_status']))
                 </div>
                 <?php
             }
-            ?>
 
+            // Admin options
+            if ( ! isset($_SESSION['as_notify']) )
+            {
+                $_SESSION['as_notify'] = $_SESSION['notify_customer_new'] ? 1 : 0;
+            }
+            ?>
+            <div class="form-group">
+                <label><?php echo $hesklang['addop']; ?>:</label>
+                <div class="checkbox-list">
+                    <div class="checkbox-custom">
+                        <input type="checkbox" id="create_notify1" name="notify" value="1" <?php echo empty($_SESSION['as_notify']) ? '' : 'checked'; ?>>
+                        <label for="create_notify1"><?php echo $hesklang['seno']; ?></label>
+                    </div>
+                    <?php if (hesk_checkPermission('can_view_tickets',0)): ?>
+                    <div class="checkbox-custom">
+                        <input type="checkbox" id="create_show1" name="show" value="1" <?php echo (!isset($_SESSION['as_show']) || !empty($_SESSION['as_show'])) ? 'checked' : ''; ?>>
+                        <label for="create_show1"><?php echo $hesklang['otas']; ?></label>
+                    </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="ut-new__submit">
             <?php if ( defined('HESK_DEMO') ): ?>
                  <?php hesk_show_notice(sprintf($hesklang['antdemo'], 'https://www.hesk.com/demo/index.php?a=add')); ?>
                 <button class="btn btn-full"><?php echo $hesklang['sub_ticket']; ?></button>
             <?php else: ?>
                 <button type="submit" class="btn btn-full"><?php echo $hesklang['sub_ticket']; ?></button>
             <?php endif; ?>
+            </div>
+            </section>
+          </aside>
             <input type="hidden" name="token" value="<?php hesk_token_echo(); ?>">
             <input type="hidden" name="category" value="<?php echo $category; ?>">
         </form>
-        <p>&nbsp;</p>
-        <p>&nbsp;</p>
-        <p>&nbsp;</p>
-        <p>&nbsp;</p>
-        <p>&nbsp;</p>
     </div>
 </div>
 <?php
@@ -1162,48 +1190,39 @@ function print_select_category($number_of_categories)
     }
     hesk_handle_messages();
     ?>
-    <div class="main__content categories">
-      <div class="table-wrap">
-        <h2 class="select__title-alt"><?php echo $hesklang['select_category_staff']; ?></h2>
+    <div class="main__content categories ut-new">
+      <div class="ut-new__wrap ut-new__wrap--narrow">
+        <div class="ut-new__head">
+          <div class="ut-crumbs"><a href="admin_main.php">&larr; <?php echo $hesklang['tickets']; ?></a> / <?php echo $hesklang['nti2']; ?></div>
+          <h1 class="ut-new__title"><?php echo $hesklang['select_category_staff']; ?></h1>
+          <p class="ut-new__req"><?php echo $hesklang['ut_new_cat_hint']; ?></p>
+        </div>
 
-        <form action="new_ticket.php" method="get" class="form">
+        <form action="new_ticket.php" method="get" class="form ut-new__card ut-catpick">
           <!-- dropdown custom -->
-          <div style="position:relative; width:100%;">
+          <div class="ut-catpick__field">
+            <svg class="icon icon-search">
+              <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-search"></use>
+            </svg>
             <input
               type="text"
               id="category_search"
+              class="form-control"
               placeholder="<?php echo $hesklang['selecionarcategoria']; ?>…"
               autocomplete="off"
-              style="width:100%; padding:8px; border:1px solid #ccc; border-radius:4px"
             />
             <input type="hidden" name="category" id="category">
 
-            <ul id="category_list"
-                style="display:none;
-                       position:absolute;
-                       top:100%; left:0; right:0;
-                       max-height:300px; overflow-y:auto;
-                       border:1px solid #ccc;
-                       border-top:none;
-                       background:#fff;
-                       margin:0; padding:0;
-                       list-style:none;
-                       z-index:1000">
+            <ul id="category_list" class="ut-catpick__list" style="display:none">
               <?php foreach ($hesk_settings['categories'] as $k => $v): ?>
-                <li data-id="<?php echo $k?>"
-                    style="padding:8px; cursor:pointer;
-                           border-top:1px solid #eee">
+                <li data-id="<?php echo $k?>">
                   <?php echo htmlspecialchars($v['name'], ENT_QUOTES)?>
                 </li>
               <?php endforeach ?>
             </ul>
           </div>
 
-          <button
-            type="submit"
-            class="btn btn-full"
-            style="margin-top:10px"
-          ><?php echo $hesklang['c2c']?></button>
+          <button type="submit" class="btn btn-full"><?php echo $hesklang['c2c']?></button>
         </form>
       </div>
     </div>
@@ -1237,6 +1256,8 @@ function print_select_category($number_of_categories)
             var txt = e.target.textContent.trim();
             inp.value = txt;
             hid.value = e.target.dataset.id;
+            Array.prototype.forEach.call(items, function(li){ li.classList.remove('is-selected'); });
+            e.target.classList.add('is-selected');
             hide();
         }
         });
@@ -1256,6 +1277,15 @@ function print_select_category($number_of_categories)
 
 
 
+
+
+function hesk_ut_is_category_description($k, $v, $category)
+{
+    // UltraTasks: custom text fields named "X - Descrição" only describe the category,
+    // they are not filled in by the user
+    return $v['use'] && $v['type'] == 'text' && hesk_is_custom_field_in_category($k, $category)
+        && preg_match('/\s-\s*Descrição$/u', trim($v['name']));
+} // END hesk_ut_is_category_description()
 
 
 function hesk_new_ticket_reset_data()
