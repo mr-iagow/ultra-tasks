@@ -368,24 +368,178 @@
 .ut-th-sorts a.is-active.asc::after { content: " \25B2"; }
 .ut-th-sorts a.is-active.desc::after { content: " \25BC"; }
 
-/* ---------- "Show tickets" form (bottom) ---------- */
+/* ---------- "Show tickets" form (collapsible panel under the search bar) ---------- */
 
-.ut-section-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 12px;
-}
-
-.ut-show {
+.ut-show-panel {
+    background: #fff;
     border: 1px solid var(--ut-line);
     border-radius: 8px;
+    margin: 0 0 20px;
     box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
 }
 
-.ut-show .search-option {
-    padding-bottom: 16px;
-    margin-bottom: 16px;
+.ut-show-panel__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px 20px;
+    background: none;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    text-align: left;
+    color: var(--ut-text);
+    cursor: pointer;
+}
+
+.ut-show-panel__head:hover {
+    background: #fafbfc;
+}
+
+.ut-show-panel__head .icon-filters {
+    width: 16px;
+    height: 16px;
+    fill: var(--ut-purple);
+}
+
+.ut-show-panel__title {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+.ut-show-panel__hint {
+    flex: 1 1 auto;
+    font-size: 13px;
+    color: var(--ut-muted);
+}
+
+.ut-show-panel__head .icon-chevron-down {
+    width: 10px;
+    height: 10px;
+    fill: var(--ut-muted);
+    transition: transform 200ms ease;
+}
+
+.ut-show-panel.is-open .ut-show-panel__head .icon-chevron-down {
+    transform: rotate(180deg);
+}
+
+.ut-show-panel.is-open .ut-show-panel__head {
     border-bottom: 1px solid var(--ut-line);
+    border-radius: 8px 8px 0 0;
+}
+
+.ut-show-panel__body {
+    padding: 16px 20px 20px;
+}
+
+.ut-show-panel__body[hidden] {
+    display: none;
+}
+
+.ut-show .ut-show__status {
+    padding-bottom: 16px;
+    margin-bottom: 0;
+    border-bottom: 1px solid var(--ut-line);
+}
+
+/* Pinned search bar with "Clear search" */
+.ut-pinned {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 20px;
+    padding: 10px 12px 10px 16px;
+    background: var(--ut-purple-soft);
+    border: 1px solid #c9b5d8;
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--ut-text);
+}
+
+.ut-pinned .icon-filters {
+    flex: 0 0 auto;
+    width: 16px;
+    height: 16px;
+    fill: var(--ut-purple);
+}
+
+.ut-pinned span {
+    flex: 1 1 auto;
+}
+
+.ut-pinned .btn {
+    flex: 0 0 auto;
+    width: auto;
+    height: 36px;
+    padding: 0 16px;
+    background: #fff;
+}
+
+/* "More options": cards grouped under "Filter" and "Display" */
+.ut-show__group-title {
+    margin: 20px 0 10px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--ut-muted);
+}
+
+.ut-show__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+    align-items: start;
+}
+
+.show_tickets .ut-show__card {
+    flex-direction: column;
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    background: #fafbfc;
+}
+
+.show_tickets .ut-show__card .search-name {
+    width: auto;
+    margin: 0 0 4px;
+}
+
+/* Select / deselect / toggle links side by side instead of stacked */
+.ut-show__card .search-name br {
+    display: none;
+}
+
+.ut-show__card .search-name .plain_link {
+    margin-left: 8px;
+    font-size: 12px;
+}
+
+.show_tickets .ut-show__card .checkbox-custom,
+.show_tickets .ut-show__card .radio-custom {
+    margin-top: 6px;
+}
+
+.ut-show__card--wide {
+    grid-column: span 2;
+}
+
+.ut-show__cols {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 12px;
+}
+
+@media screen and (max-width: 900px) {
+    .ut-show-panel__hint {
+        display: none;
+    }
+    .ut-show__card--wide {
+        grid-column: auto;
+    }
 }
 
 .ut-show .search-name {

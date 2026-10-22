@@ -272,8 +272,26 @@ if (true)
     "javascript:document.getElementById('delete-tickets-form').submit()",
         $hesklang['confirm']);
 
-    // Search form above the ticket list
+    // Search form and collapsible "Show tickets" panel above the ticket list
     require_once(HESK_PATH . 'inc/show_find_form.inc.php');
+    require_once(HESK_PATH . 'inc/show_search_form.inc.php');
+
+    // Pin this search so admin_main.php brings the user back here (cleared with admin_main.php?clear_search=1)
+    if ($href == 'show_tickets.php' || $href == 'find_tickets.php')
+    {
+        $pinned_params = $_GET;
+        unset($pinned_params['def'], $pinned_params['page']);
+        $_SESSION['ut_pinned_list'] = $href . '?' . http_build_query($pinned_params);
+        ?>
+        <div class="ut-pinned">
+            <svg class="icon icon-filters">
+                <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-filters"></use>
+            </svg>
+            <span><b><?php echo $hesklang['ut_pinned']; ?></b> <?php echo $hesklang['ut_pinned_hint']; ?></span>
+            <a class="btn btn--blue-border" href="admin_main.php?clear_search=1"><?php echo $hesklang['ut_clear_search']; ?></a>
+        </div>
+        <?php
+    }
 
     // Are some open tickets hidden?
     if ($href != 'find_tickets.php' && $totals['filtered']['open'] != $totals['open'])

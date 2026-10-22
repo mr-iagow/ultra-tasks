@@ -27,6 +27,19 @@ hesk_session_start();
 hesk_dbConnect();
 hesk_isLoggedIn();
 
+// Pinned search: going back to the ticket list reopens the last search until the user clears it
+if (isset($_GET['clear_search']))
+{
+    unset($_SESSION['ut_pinned_list']);
+    header('Location: admin_main.php');
+    exit();
+}
+elseif (empty($_GET) && ! empty($_SESSION['ut_pinned_list']))
+{
+    header('Location: ' . $_SESSION['ut_pinned_list']);
+    exit();
+}
+
 define('CALENDAR',1);
 define('MAIN_PAGE',1);
 define('AUTO_RELOAD',1);
@@ -70,7 +83,7 @@ if (hesk_checkPermission('can_view_tickets',0))
     echo "&nbsp;<br />";
 
     /* Print forms for listing and searching tickets */
-	require(HESK_PATH . 'inc/show_search_form.inc.php');
+	require_once(HESK_PATH . 'inc/show_search_form.inc.php');
 }
 else
 {

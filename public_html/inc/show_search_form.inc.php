@@ -23,10 +23,20 @@ require_once(HESK_PATH . 'inc/show_find_form.inc.php');
 ?>
 
 <!-- ** START SHOW TICKET FORM ** -->
-<h2 class="ut-section-title"><?php echo $hesklang['show_tickets']; ?></h2>
-<div class="table-wrap ut-show">
+<section class="ut-show-panel<?php echo $more ? ' is-open' : ''; ?>" id="utShowPanel">
+    <button type="button" class="ut-show-panel__head" id="utShowToggle" aria-controls="utShowBody" aria-expanded="<?php echo $more ? 'true' : 'false'; ?>">
+        <svg class="icon icon-filters">
+            <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-filters"></use>
+        </svg>
+        <span class="ut-show-panel__title"><?php echo $hesklang['show_tickets']; ?></span>
+        <span class="ut-show-panel__hint"><?php echo $hesklang['ut_show_hint']; ?></span>
+        <svg class="icon icon-chevron-down">
+            <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-chevron-down"></use>
+        </svg>
+    </button>
+    <div class="ut-show-panel__body ut-show" id="utShowBody"<?php echo $more ? '' : ' hidden'; ?>>
     <form name="showt" action="show_tickets.php" method="get" class="show_tickets form">
-        <div class="search-option">
+        <div class="search-option ut-show__status">
             <div class="search-name">
                 <?php echo $hesklang['status']; ?>
                 <br><a href="" id="selectAllStatus" class="plain_link"><?php echo $hesklang['a_select']; ?></a>
@@ -48,241 +58,250 @@ require_once(HESK_PATH . 'inc/show_find_form.inc.php');
             </div>
         </div>
         <div id="divShow" style="display:<?php echo $more ? 'block' : 'none' ; ?>">
-            <div class="search-option">
-                <div class="search-name">
-                    <?php echo $hesklang['priority']; ?>
-                    <br><a href="" id="selectAllPriority" class="plain_link"><?php echo $hesklang['a_select']; ?></a>
-                    <br><a href="" id="deselectAllPriority" class="plain_link"><?php echo $hesklang['a_deselect']; ?></a>
-                    <br><a href="" id="toggleAllPriority" class="plain_link"><?php echo $hesklang['a_toggle']; ?></a>
+            <h3 class="ut-show__group-title"><?php echo $hesklang['ut_show_filter']; ?></h3>
+            <div class="ut-show__grid">
+                <div class="search-option ut-show__card">
+                    <div class="search-name">
+                        <?php echo $hesklang['priority']; ?>
+                        <br><a href="" id="selectAllPriority" class="plain_link"><?php echo $hesklang['a_select']; ?></a>
+                        <br><a href="" id="deselectAllPriority" class="plain_link"><?php echo $hesklang['a_deselect']; ?></a>
+                        <br><a href="" id="toggleAllPriority" class="plain_link"><?php echo $hesklang['a_toggle']; ?></a>
+                    </div>
+                    <div class="search-options">
+                        <div class="checkbox-list">
+                            <div class="checkbox-custom">
+                                <input type="checkbox" id="priority_0" name="p0" value="1" <?php if (isset($priority[0])) {echo 'checked';} ?>>
+                                <label for="priority_0"><span class="priority0"><?php echo $hesklang['critical']; ?></span></label>
+                            </div>
+                            <div class="checkbox-custom">
+                                <input type="checkbox" id="priority_1" name="p1" value="1" <?php if (isset($priority[1])) {echo 'checked';} ?>>
+                                <label for="priority_1"><span class="priority1"><?php echo $hesklang['high']; ?></span></label>
+                            </div>
+                            <div class="checkbox-custom">
+                                <input type="checkbox" id="priority_2" name="p2" value="1" <?php if (isset($priority[2])) {echo 'checked';} ?>>
+                                <label for="priority_2"><span class="priority2"><?php echo $hesklang['medium']; ?></span></label>
+                            </div>
+                            <div class="checkbox-custom">
+                                <input type="checkbox" id="priority_3" name="p3" value="1" <?php if (isset($priority[3])) {echo 'checked';} ?>>
+                                <label for="priority_3"><span class="priority3"><?php echo $hesklang['low']; ?></span></label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="search-options">
-                    <div class="checkbox-list">
-                        <div class="checkbox-custom">
-                            <input type="checkbox" id="priority_0" name="p0" value="1" <?php if (isset($priority[0])) {echo 'checked';} ?>>
-                            <label for="priority_0"><span class="priority0"><?php echo $hesklang['critical']; ?></span></label>
+                <div class="search-option ut-show__card">
+                    <div class="search-name">
+                        <?php echo $hesklang['show']; ?>
+                        <br><a href="" id="selectAllShow" class="plain_link"><?php echo $hesklang['a_select']; ?></a>
+                        <br><a href="" id="deselectAllShow" class="plain_link"><?php echo $hesklang['a_deselect']; ?></a>
+                        <br><a href="" id="toggleAllShow" class="plain_link"><?php echo $hesklang['a_toggle']; ?></a>
+                    </div>
+                    <div class="search-options">
+                        <div class="checkbox-list">
+                            <div class="checkbox-custom">
+                                <input type="checkbox" id="show_my" name="s_my" value="1" <?php if ($s_my[1]) echo 'checked'; ?>>
+                                <label for="show_my"><?php echo $hesklang['s_my']; ?></label>
+                            </div>
+                            <?php
+                            if ($can_view_unassigned)
+                            {
+                                ?>
+                                <div class="checkbox-custom">
+                                    <input type="checkbox" id="show_un" name="s_un" value="1" <?php if ($s_un[1]) echo 'checked'; ?>>
+                                    <label for="show_un"><?php echo $hesklang['s_un']; ?></label>
+                                </div>
+                                <?php
+                            }
+                            ?>
+                            <?php
+                            if ($can_view_ass_others || $can_view_ass_by)
+                            {
+                                ?>
+                                <div class="checkbox-custom">
+                                    <input type="checkbox" id="show_ot" name="s_ot" value="1" <?php if ($s_ot[1]) echo 'checked'; ?>>
+                                    <label for="show_ot"><?php echo $hesklang['s_ot']; ?></label>
+                                </div>
+                                <?php
+                            }
+                            ?>
+                            <div class="checkbox-custom">
+                                <input type="checkbox" id="show_archive" name="archive" value="1" <?php if ($archive[1]) echo 'checked'; ?>>
+                                <label for="show_archive"><?php echo $hesklang['disp_only_archived']; ?></label>
+                            </div>
                         </div>
-                        <div class="checkbox-custom">
-                            <input type="checkbox" id="priority_1" name="p1" value="1" <?php if (isset($priority[1])) {echo 'checked';} ?>>
-                            <label for="priority_1"><span class="priority1"><?php echo $hesklang['high']; ?></span></label>
-                        </div>
-                        <div class="checkbox-custom">
-                            <input type="checkbox" id="priority_2" name="p2" value="1" <?php if (isset($priority[2])) {echo 'checked';} ?>>
-                            <label for="priority_2"><span class="priority2"><?php echo $hesklang['medium']; ?></span></label>
-                        </div>
-                        <div class="checkbox-custom">
-                            <input type="checkbox" id="priority_3" name="p3" value="1" <?php if (isset($priority[3])) {echo 'checked';} ?>>
-                            <label for="priority_3"><span class="priority3"><?php echo $hesklang['low']; ?></span></label>
+                    </div>
+                </div>
+                <div class="search-option ut-show__card">
+                    <div class="search-name">
+                        <?php echo $hesklang['category']; ?>
+                    </div>
+                    <div class="search-options">
+                        <select name="category">
+                            <option value="0" ><?php echo $hesklang['any_cat']; ?></option>
+                            <?php echo $category_options; ?>
+                        </select>
+                    </div>
+                </div>
+                <div class="search-option ut-show__card ut-show__card--wide">
+                    <div class="search-name">
+                        <?php echo $hesklang['due_date']; ?>
+                    </div>
+                    <div class="search-options">
+                        <div class="radio-list">
+                            <div class="radio-custom" style="margin-top: 0px;">
+                                <input type="radio" id="duedate_specific" name="duedate_option" value="specific" <?php if ($duedate_search_type === 'specific') echo 'checked'; ?>>
+                                <label for="duedate_specific"><?php echo $hesklang['search_due_date_specific']; ?></label>
+                                <section class="param calendar">
+                                    <div class="calendar--button">
+                                        <button type="button" onclick="document.getElementById('duedate_specific').checked = true">
+                                            <svg class="icon icon-calendar">
+                                                <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-calendar"></use>
+                                            </svg>
+                                        </button>
+                                        <input name="duedate_specific_date" id="duedate_specific_date"
+                                            <?php if ($duedate_input) {echo 'value="'.$duedate_input.'"';} ?>
+                                               type="text" class="datepicker">
+                                    </div>
+                                    <div class="calendar--value" <?php echo ($duedate_input ? 'style="display: block"' : ''); ?>>
+                                        <span><?php echo $duedate_input; ?></span>
+                                        <i class="close">
+                                            <svg class="icon icon-close">
+                                                <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-close"></use>
+                                            </svg>
+                                        </i>
+                                    </div>
+                                </section>
+                            </div>
+                            <div class="radio-custom">
+                                <input type="radio" id="duedate_range" name="duedate_option" value="range" <?php if ($duedate_search_type === 'range') echo 'checked'; ?>>
+                                <label for="duedate_range"><?php echo $hesklang['search_due_date_range']; ?></label>
+                                <input class="form-control" type="text" id="duedate_amount_value" name="duedate_amount_value" value="<?php echo $duedate_amount_value; ?>" style="width: 25%"
+                                       onkeyup="document.getElementById('duedate_range').checked = true">
+                                <label for="duedate_amount_value">&nbsp;</label>
+                                <select name="duedate_amount_unit" onclick="document.getElementById('duedate_range').checked = true" onchange="document.getElementById('duedate_range').checked = true" style="margin-top:5px;margin-bottom:5px;">
+                                    <option value="day" <?php if ($duedate_amount_unit === 'day') echo 'selected'; ?>><?php echo $hesklang['d_day']; ?></option>
+                                    <option value="week" <?php if ($duedate_amount_unit === 'week') echo 'selected'; ?>><?php echo $hesklang['d_week']; ?></option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="search-option">
-                <div class="search-name">
-                    <?php echo $hesklang['show']; ?>
-                    <br><a href="" id="selectAllShow" class="plain_link"><?php echo $hesklang['a_select']; ?></a>
-                    <br><a href="" id="deselectAllShow" class="plain_link"><?php echo $hesklang['a_deselect']; ?></a>
-                    <br><a href="" id="toggleAllShow" class="plain_link"><?php echo $hesklang['a_toggle']; ?></a>
-                </div>
-                <div class="search-options">
-                    <div class="checkbox-list">
-                        <div class="checkbox-custom">
-                            <input type="checkbox" id="show_my" name="s_my" value="1" <?php if ($s_my[1]) echo 'checked'; ?>>
-                            <label for="show_my"><?php echo $hesklang['s_my']; ?></label>
-                        </div>
-                        <?php
-                        if ($can_view_unassigned)
-                        {
-                            ?>
-                            <div class="checkbox-custom">
-                                <input type="checkbox" id="show_un" name="s_un" value="1" <?php if ($s_un[1]) echo 'checked'; ?>>
-                                <label for="show_un"><?php echo $hesklang['s_un']; ?></label>
-                            </div>
-                            <?php
-                        }
-                        ?>
-                        <?php
-                        if ($can_view_ass_others || $can_view_ass_by)
-                        {
-                            ?>
-                            <div class="checkbox-custom">
-                                <input type="checkbox" id="show_ot" name="s_ot" value="1" <?php if ($s_ot[1]) echo 'checked'; ?>>
-                                <label for="show_ot"><?php echo $hesklang['s_ot']; ?></label>
-                            </div>
-                            <?php
-                        }
-                        ?>
-                        <div class="checkbox-custom">
-                            <input type="checkbox" id="show_archive" name="archive" value="1" <?php if ($archive[1]) echo 'checked'; ?>>
-                            <label for="show_archive"><?php echo $hesklang['disp_only_archived']; ?></label>
-                        </div>
+            <h3 class="ut-show__group-title"><?php echo $hesklang['ut_show_view']; ?></h3>
+            <div class="ut-show__grid">
+                <div class="search-option ut-show__card">
+                    <div class="search-name">
+                        <?php echo $hesklang['sort_by']; ?>
                     </div>
-                </div>
-            </div>
-            <div class="search-option">
-                <div class="search-name">
-                    <?php echo $hesklang['sort_by']; ?>
-                </div>
-                <div class="search-options">
-                    <div class="radio-list">
-                        <?php
-                        array_unshift($hesk_settings['ticket_list'], 'priority');
-                        $hesk_settings['possible_ticket_list']['priority'] = $hesklang['priority'];
+                    <div class="search-options">
+                        <div class="radio-list ut-show__cols">
+                            <?php
+                            // Local copies: this form is printed above the ticket list, which still needs the original columns
+                            $sort_keys = $hesk_settings['ticket_list'];
+                            array_unshift($sort_keys, 'priority');
+                            $sort_labels = $hesk_settings['possible_ticket_list'];
+                            $sort_labels['priority'] = $hesklang['priority'];
 
-                        foreach ($hesk_settings['ticket_list'] as $key):
-                            if (!key_exists($key, $hesk_settings['possible_ticket_list'])) {
-                                continue;
+                            foreach ($sort_keys as $key):
+                                if (!key_exists($key, $sort_labels)) {
+                                    continue;
+                                }
+                                ?>
+                                <div class="radio-custom">
+                                    <input type="radio" id="sort<?php echo $key; ?>" name="sort" value="<?php echo $key; ?>"
+                                        <?php if ($sort == $key) { echo 'checked'; } ?>>
+                                    <label for="sort<?php echo $key; ?>">
+                                        <?php echo $sort_labels[$key]; ?>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="search-option ut-show__card">
+                    <div class="search-name">
+                        <?php echo $hesklang['order']; ?>
+                    </div>
+                    <div class="search-options">
+                        <div class="radio-list">
+                            <div class="radio-custom">
+                                <input type="radio" name="asc" value="1" id="g_asc1" <?php if ($asc) {echo 'checked';} ?>>
+                                <label for="g_asc1">
+                                    <?php echo $hesklang['ascending']; ?>
+                                </label>
+                            </div>
+                            <div class="radio-custom">
+                                <input type="radio" name="asc" value="0" id="g_asc0" <?php if (!$asc) {echo 'checked';} ?>>
+                                <label for="g_asc0">
+                                    <?php echo $hesklang['descending']; ?>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="search-option ut-show__card">
+                    <div class="search-name">
+                        <?php echo $hesklang['gb']; ?>
+                    </div>
+                    <div class="search-options">
+                        <div class="radio-list">
+                            <div class="radio-custom">
+                                <input type="radio" name="g" value="" id="g_" <?php if (!$group) {echo 'checked';} ?>>
+                                <label for="g_">
+                                    <?php echo $hesklang['dg']; ?>
+                                </label>
+                            </div>
+                            <?php
+                            if ($can_view_unassigned || $can_view_ass_others || $can_view_ass_by)
+                            {
+                                ?>
+                                <div class="radio-custom">
+                                    <input type="radio" name="g" value="owner" id="g_owner" <?php if ($group == 'owner') {echo 'checked';} ?>>
+                                    <label for="g_owner">
+                                        <?php echo $hesklang['owner']; ?>
+                                    </label>
+                                </div>
+                                <?php
                             }
                             ?>
                             <div class="radio-custom">
-                                <input type="radio" id="sort<?php echo $key; ?>" name="sort" value="<?php echo $key; ?>"
-                                    <?php if ($sort == $key) { echo 'checked'; } ?>>
-                                <label for="sort<?php echo $key; ?>">
-                                    <?php echo $hesk_settings['possible_ticket_list'][$key]; ?>
+                                <input type="radio" name="g" value="category" id="g_category" <?php if ($group == 'category') {echo 'checked';} ?>>
+                                <label for="g_category">
+                                    <?php echo $hesklang['category']; ?>
                                 </label>
                             </div>
-                        <?php endforeach; ?>
-                    </div>
-                </div>
-            </div>
-            <div class="search-option">
-                <div class="search-name">
-                    <?php echo $hesklang['gb']; ?>
-                </div>
-                <div class="search-options">
-                    <div class="radio-list">
-                        <div class="radio-custom">
-                            <input type="radio" name="g" value="" id="g_" <?php if (!$group) {echo 'checked';} ?>>
-                            <label for="g_">
-                                <?php echo $hesklang['dg']; ?>
-                            </label>
-                        </div>
-                        <?php
-                        if ($can_view_unassigned || $can_view_ass_others || $can_view_ass_by)
-                        {
-                            ?>
                             <div class="radio-custom">
-                                <input type="radio" name="g" value="owner" id="g_owner" <?php if ($group == 'owner') {echo 'checked';} ?>>
-                                <label for="g_owner">
-                                    <?php echo $hesklang['owner']; ?>
+                                <input type="radio" name="g" value="priority" id="g_priority" <?php if ($group == 'priority') {echo 'checked';} ?>>
+                                <label for="g_priority">
+                                    <?php echo $hesklang['priority']; ?>
                                 </label>
                             </div>
-                            <?php
-                        }
-                        ?>
-                        <div class="radio-custom">
-                            <input type="radio" name="g" value="category" id="g_category" <?php if ($group == 'category') {echo 'checked';} ?>>
-                            <label for="g_category">
-                                <?php echo $hesklang['category']; ?>
-                            </label>
-                        </div>
-                        <div class="radio-custom">
-                            <input type="radio" name="g" value="priority" id="g_priority" <?php if ($group == 'priority') {echo 'checked';} ?>>
-                            <label for="g_priority">
-                                <?php echo $hesklang['priority']; ?>
-                            </label>
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="search-option">
-                <div class="search-name">
-                    <?php echo $hesklang['due_date']; ?>
-                </div>
-                <div class="search-options">
-                    <div class="radio-list">
-                        <div class="radio-custom" style="margin-top: 0px;">
-                            <input type="radio" id="duedate_specific" name="duedate_option" value="specific" <?php if ($duedate_search_type === 'specific') echo 'checked'; ?>>
-                            <label for="duedate_specific"><?php echo $hesklang['search_due_date_specific']; ?></label>
-                            <section class="param calendar">
-                                <div class="calendar--button">
-                                    <button type="button" onclick="document.getElementById('duedate_specific').checked = true">
-                                        <svg class="icon icon-calendar">
-                                            <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-calendar"></use>
-                                        </svg>
-                                    </button>
-                                    <input name="duedate_specific_date" id="duedate_specific_date"
-                                        <?php if ($duedate_input) {echo 'value="'.$duedate_input.'"';} ?>
-                                           type="text" class="datepicker">
-                                </div>
-                                <div class="calendar--value" <?php echo ($duedate_input ? 'style="display: block"' : ''); ?>>
-                                    <span><?php echo $duedate_input; ?></span>
-                                    <i class="close">
-                                        <svg class="icon icon-close">
-                                            <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-close"></use>
-                                        </svg>
-                                    </i>
-                                </div>
-                            </section>
-                        </div>
-                        <div class="radio-custom">
-                            <input type="radio" id="duedate_range" name="duedate_option" value="range" <?php if ($duedate_search_type === 'range') echo 'checked'; ?>>
-                            <label for="duedate_range"><?php echo $hesklang['search_due_date_range']; ?></label>
-                            <input class="form-control" type="text" id="duedate_amount_value" name="duedate_amount_value" value="<?php echo $duedate_amount_value; ?>" style="width: 25%"
-                                   onkeyup="document.getElementById('duedate_range').checked = true">
-                            <label for="duedate_amount_value">&nbsp;</label>
-                            <select name="duedate_amount_unit" onclick="document.getElementById('duedate_range').checked = true" onchange="document.getElementById('duedate_range').checked = true" style="margin-top:5px;margin-bottom:5px;">
-                                <option value="day" <?php if ($duedate_amount_unit === 'day') echo 'selected'; ?>><?php echo $hesklang['d_day']; ?></option>
-                                <option value="week" <?php if ($duedate_amount_unit === 'week') echo 'selected'; ?>><?php echo $hesklang['d_week']; ?></option>
-                            </select>
-                        </div>
+                <div class="search-option ut-show__card">
+                    <div class="search-name">
+                        <?php echo $hesklang['display']; ?>
+                    </div>
+                    <div class="search-options">
+                        <input class="form-control" type="text" name="limit" value="<?php echo $maxresults; ?>" style="width: 25%">
+                        <?php echo $hesklang['tickets_page']; ?>
                     </div>
                 </div>
-            </div>
-            <div class="search-option">
-                <div class="search-name">
-                    <?php echo $hesklang['category']; ?>
-                </div>
-                <div class="search-options">
-                    <select name="category">
-                        <option value="0" ><?php echo $hesklang['any_cat']; ?></option>
-                        <?php echo $category_options; ?>
-                    </select>
-                </div>
-            </div>
-            <div class="search-option">
-                <div class="search-name">
-                    <?php echo $hesklang['display']; ?>
-                </div>
-                <div class="search-options">
-                    <input class="form-control" type="text" name="limit" value="<?php echo $maxresults; ?>" style="width: 25%">
-                    <?php echo $hesklang['tickets_page']; ?>
-                </div>
-            </div>
-            <div class="search-option">
-                <div class="search-name">
-                    <?php echo $hesklang['order']; ?>
-                </div>
-                <div class="search-options">
-                    <div class="radio-list">
-                        <div class="radio-custom">
-                            <input type="radio" name="asc" value="1" id="g_asc1" <?php if ($asc) {echo 'checked';} ?>>
-                            <label for="g_asc1">
-                                <?php echo $hesklang['ascending']; ?>
-                            </label>
-                        </div>
-                        <div class="radio-custom">
-                            <input type="radio" name="asc" value="0" id="g_asc0" <?php if (!$asc) {echo 'checked';} ?>>
-                            <label for="g_asc0">
-                                <?php echo $hesklang['descending']; ?>
-                            </label>
-                        </div>
+                <div class="search-option ut-show__card ut-show__card--wide">
+                    <div class="search-name">
+                        <?php echo $hesklang['opt']; ?>
                     </div>
-                </div>
-            </div>
-            <div class="search-option">
-                <div class="search-name">
-                    <?php echo $hesklang['opt']; ?>
-                </div>
-                <div class="search-options">
-                    <div class="checkbox-list">
-                        <div class="checkbox-custom">
-                            <input type="checkbox" name="cot" id="g_cot" value="1" <?php if ($cot) {echo 'checked';} ?>>
-                            <label for="g_cot"><?php echo $hesklang['cot']; ?></label>
-                        </div>
-                        <div class="checkbox-custom">
-                            <input type="checkbox" name="def" value="1" id="g_def">
-                            <label for="g_def"><?php echo $hesklang['def']; ?></label>&nbsp;
-                            (<a href="admin_main.php?reset=1&amp;token=<?php echo hesk_token_echo(0); ?>"><?php echo $hesklang['redv']; ?></a>)
+                    <div class="search-options">
+                        <div class="checkbox-list">
+                            <div class="checkbox-custom">
+                                <input type="checkbox" name="cot" id="g_cot" value="1" <?php if ($cot) {echo 'checked';} ?>>
+                                <label for="g_cot"><?php echo $hesklang['cot']; ?></label>
+                            </div>
+                            <div class="checkbox-custom">
+                                <input type="checkbox" name="def" value="1" id="g_def">
+                                <label for="g_def"><?php echo $hesklang['def']; ?></label>&nbsp;
+                                (<a href="admin_main.php?reset=1&amp;token=<?php echo hesk_token_echo(0); ?>"><?php echo $hesklang['redv']; ?></a>)
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -296,9 +315,37 @@ require_once(HESK_PATH . 'inc/show_find_form.inc.php');
             </div>
         </div>
     </form>
-</div>
+    </div>
+</section>
 
 <script>
+// Collapsible "Show tickets" panel; remember if the user left it open
+(function () {
+    var panel = document.getElementById('utShowPanel');
+    var toggle = document.getElementById('utShowToggle');
+    var body = document.getElementById('utShowBody');
+
+    function setOpen(open) {
+        panel.classList.toggle('is-open', open);
+        toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        body.hidden = !open;
+    }
+
+    try {
+        if (localStorage.getItem('utShowOpen') === '1') {
+            setOpen(true);
+        }
+    } catch (e) {}
+
+    toggle.addEventListener('click', function () {
+        var open = body.hidden;
+        setOpen(open);
+        try {
+            localStorage.setItem('utShowOpen', open ? '1' : '0');
+        } catch (e) {}
+    });
+})();
+
 // STATUS
 $("#selectAllStatus").click(function(event) {
     event.preventDefault();
