@@ -198,7 +198,7 @@ $calling_script = basename($_SERVER['PHP_SELF'], '.php');
 
                 //Reports
                 if (hesk_checkPermission('can_run_reports',0)) {
-                    $pages = array('reports', 'export');
+                    $pages = array('ut_reports', 'reports', 'export');
                     $open_menu = in_array($calling_script, $pages) ? 'current submenu-is-opened' : '';
                 ?>
                 <li class="listitem submenu <?php echo $open_menu; ?>">
@@ -213,6 +213,11 @@ $calling_script = basename($_SERVER['PHP_SELF'], '.php');
                     <div class="listitem__menu">
                         <a href="#" class="listitem__caption"><?php echo $hesklang['reports']; ?></a>
                         <ul class="submenu__list">
+                            <li class="submenu__listitem <?php if ($calling_script === 'ut_reports') { ?>current<?php } ?>">
+                                <a href="ut_reports.php">
+                                    <?php echo $hesklang['ut_rep_menu']; ?>
+                                </a>
+                            </li>
                             <li class="submenu__listitem <?php if ($calling_script === 'reports') { ?>current<?php } ?>">
                                 <a href="reports.php">
                                     <?php echo $hesklang['reports_tab']; ?>
@@ -233,6 +238,39 @@ $calling_script = basename($_SERVER['PHP_SELF'], '.php');
                     </div>
                 </li>
                 <?php
+                } elseif (hesk_checkPermission('can_view_tickets',0)) {
+                    // Staff without "run reports" still get the ticket report (and export, if allowed)
+                    $pages = array('ut_reports', 'export');
+                    $open_menu = in_array($calling_script, $pages) ? 'current submenu-is-opened' : '';
+                    ?>
+                    <li class="listitem submenu <?php echo $open_menu; ?>">
+                        <div class="listitem__icon">
+                            <a href="#">
+                                <svg class="icon icon-reports">
+                                    <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-reports"></use>
+                                </svg>
+                            </a>
+                        </div>
+                        <div class="separator"></div>
+                        <div class="listitem__menu">
+                            <a href="#" class="listitem__caption"><?php echo $hesklang['reports']; ?></a>
+                            <ul class="submenu__list">
+                                <li class="submenu__listitem <?php if ($calling_script === 'ut_reports') { ?>current<?php } ?>">
+                                    <a href="ut_reports.php">
+                                        <?php echo $hesklang['ut_rep_menu']; ?>
+                                    </a>
+                                </li>
+                                <?php if (hesk_checkPermission('can_export',0)) { ?>
+                                <li class="submenu__listitem <?php if ($calling_script === 'export') { ?>current<?php } ?>">
+                                    <a href="export.php">
+                                        <?php echo $hesklang['export']; ?>
+                                    </a>
+                                </li>
+                                <?php } ?>
+                            </ul>
+                        </div>
+                    </li>
+                    <?php
                 } elseif (hesk_checkPermission('can_export',0)) {
                     ?>
                     <li class="listitem <?php if ($calling_script === 'export') { ?>current<?php } ?>">
