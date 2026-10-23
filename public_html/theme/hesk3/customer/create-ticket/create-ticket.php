@@ -17,13 +17,18 @@ if (!defined('IN_SCRIPT')) {
 require_once(TEMPLATE_PATH . 'customer/util/alerts.php');
 require_once(TEMPLATE_PATH . 'customer/util/custom-fields.php');
 require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
+
+// Category 99 is the Whistleblowing Channel ("Canal de Denúncias"), linked from the company site
+$is_den = ($categoryId == 99);
+// Keep the identification choice after a validation error
+$den_identified = isset($_SESSION['c_identificar']) && $_SESSION['c_identificar'] === 'sim';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
-    <title><?php echo $hesk_settings['tmp_title']; ?></title>
+    <title><?php echo $is_den ? $hesklang['ut_den_title'] : $hesk_settings['tmp_title']; ?></title>
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta name="viewport" content="width=device-width,minimum-scale=1.0,maximum-scale=1.0" />
     <link rel="apple-touch-icon" sizes="180x180" href="<?php echo HESK_PATH; ?>img/favicon/info180x180.png" />
@@ -46,18 +51,25 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
             margin-top: 20px;
         }
     </style>
+    <?php if ($is_den): ?>
+    <link rel="stylesheet" media="all" href="<?php echo TEMPLATE_PATH; ?>customer/css/ut-denuncia.css?<?php echo filemtime(TEMPLATE_PATH . 'customer/css/ut-denuncia.css'); ?>" />
+    <?php endif; ?>
     <?php include(TEMPLATE_PATH . '../../head.txt'); ?>
 </head>
-<body class="cust-help">
+<body class="cust-help<?php echo $is_den ? ' ut-den-page' : ''; ?>">
 <?php include(TEMPLATE_PATH . '../../header.txt'); ?>
 <div class="wrapper">
     <main class="main">
+        <?php // The complaint channel has no top bar unless the language selector needs it ?>
+        <?php if ( ! $is_den || $hesk_settings['can_sel_lang']): ?>
         <header class="header">
             <div class="contr">
                 <div class="header__inner">
+                    <?php if ( ! $is_den): ?>
                     <a href="<?php echo $hesk_settings['hesk_url']; ?>" class="header__logo">
                         <?php echo $hesk_settings['hesk_title']; ?>
                     </a>
+                    <?php endif; ?>
                     <?php if ($hesk_settings['can_sel_lang']): ?>
                         <div class="header__lang">
                             <form method="get" action="" style="margin:0;padding:0;border:0;white-space:nowrap;">
@@ -76,6 +88,8 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                 </div>
             </div>
         </header>
+        <?php endif; ?>
+        <?php if ( ! $is_den): ?>
         <div class="breadcrumbs">
             <div class="contr">
                 <div class="breadcrumbs__inner">
@@ -101,6 +115,7 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                 </div>
             </div>
         </div>
+        <?php endif; ?>
         <div class="main__content">
             <div class="contr">
                 <div style="margin-bottom: 20px;">
@@ -108,6 +123,19 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                     hesk3_show_messages($messages);
                     ?>
                 </div>
+                <?php if ($is_den): ?>
+                <section class="ut-den-hero">
+                    <svg class="ut-den-shield" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5.25 3.4 10.15 8 11 4.6-.85 8-5.75 8-11V5l-8-3Zm-1.2 14.2-3.5-3.5 1.4-1.4 2.1 2.1 4.9-4.9 1.4 1.4-6.3 6.3Z"/></svg>
+                    <div>
+                        <h1 class="ut-den-hero__title"><?php echo $hesklang['ut_den_title']; ?></h1>
+                        <p class="ut-den-hero__intro"><?php echo $hesklang['ut_den_intro']; ?></p>
+                    </div>
+                </section>
+                <div class="article-heading-tip ut-den-req">
+                    <span><?php echo $hesklang['req_marked_with']; ?></span>
+                    <span class="label required"></span>
+                </div>
+                <?php else: ?>
                 <h3 class="article__heading article__heading--form">
                     <div class="icon-in-circle">
                         <svg class="icon icon-submit-ticket">
@@ -120,7 +148,8 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                     <span><?php echo $hesklang['req_marked_with']; ?></span>
                     <span class="label required"></span>
                 </div>
-                <form class="form form-submit-ticket ticket-create <?php echo count($_SESSION['iserror']) ? 'invalid' : ''; ?>" method="post" action="submit_ticket.php?submit=1" name="form1" id="form1" enctype="multipart/form-data">
+                <?php endif; ?>
+                <form class="form form-submit-ticket ticket-create<?php echo $is_den ? ' ut-den-form' : ''; ?> <?php echo count($_SESSION['iserror']) ? 'invalid' : ''; ?>" method="post" action="submit_ticket.php?submit=1" name="form1" id="form1" enctype="multipart/form-data">
                     <section class="form-groups">
                         <?php if ($categoryId != 99): ?>
                         <div class="form-group error">
@@ -148,18 +177,29 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                         <?php endif; ?>
                         <?php else: // categoria 99 - toggle de identificação ?>
 
-                        <!-- Toggle: Deseja se identificar? -->
-                        <div class="form-group" style="margin-bottom: 16px;">
-                            <label class="label" style="font-weight: 600; margin-bottom: 8px; display: block;">Deseja se identificar?</label>
-                            <div style="display: flex; gap: 12px;">
-                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 15px;">
-                                    <input type="radio" name="identificar" id="identificar_sim" value="sim" style="width: 18px; height: 18px; cursor: pointer;">
-                                    Sim
+                        <!-- 1. Identification: anonymous or identified -->
+                        <div class="ut-den-card">
+                            <h2 class="ut-den-card__title"><span class="ut-den-step">1</span> <?php echo $hesklang['ut_den_s1']; ?></h2>
+                            <p class="ut-den-card__hint"><?php echo $hesklang['ut_den_s1_hint']; ?></p>
+                            <div class="ut-den-choice">
+                                <label class="ut-den-option">
+                                    <input type="radio" name="identificar" id="identificar_nao" value="nao" <?php echo $den_identified ? '' : 'checked'; ?>>
+                                    <span>
+                                        <b><?php echo $hesklang['ut_den_anon']; ?></b>
+                                        <small><?php echo $hesklang['ut_den_anon_d']; ?></small>
+                                    </span>
                                 </label>
-                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 15px;">
-                                    <input type="radio" name="identificar" id="identificar_nao" value="nao" checked style="width: 18px; height: 18px; cursor: pointer;">
-                                    Não
+                                <label class="ut-den-option">
+                                    <input type="radio" name="identificar" id="identificar_sim" value="sim" <?php echo $den_identified ? 'checked' : ''; ?>>
+                                    <span>
+                                        <b><?php echo $hesklang['ut_den_ident']; ?></b>
+                                        <small><?php echo $hesklang['ut_den_ident_d']; ?></small>
+                                    </span>
                                 </label>
+                            </div>
+                            <div class="ut-den-ident" id="utDenIdent">
+                                <?php hesk3_output_custom_fields($customFieldsBeforeMessage); ?>
+                                <p class="ut-den-note"><?php echo $hesklang['ut_den_ident_note']; ?></p>
                             </div>
                         </div>
 
@@ -188,6 +228,7 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
 
                             function toggleIdentificacao() {
                                 var sim = document.getElementById('identificar_sim').checked;
+                                document.getElementById('utDenIdent').style.display = sim ? '' : 'none';
                                 var camposCustom = ['custom52', 'custom3', 'custom64'];
                                 camposCustom.forEach(function(fieldName) {
                                     var wrapper = getFieldWrapper(fieldName);
@@ -217,7 +258,9 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
 
                         <?php endif; // fim categoria 99 ?>
                     </section>
-                    <?php if ($hesk_settings['cust_urgency']): ?>
+                    <?php if ($is_den && $hesk_settings['cust_urgency']): ?>
+                        <input type="hidden" name="priority" value="low">
+                    <?php elseif ($hesk_settings['cust_urgency']): ?>
                         <section class="param">
                             <span class="label required <?php if (in_array('priority',$_SESSION['iserror'])) echo 'isErrorStr'; ?>"><?php echo $hesklang['priority']; ?>:</span>
                             <div class="dropdown-select center out-close priority">
@@ -239,22 +282,37 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                         </section>
                     <?php
                     endif;
-                    if (count($visibleCustomFieldsBeforeMessage) > 0):
+                    if ( ! $is_den && count($visibleCustomFieldsBeforeMessage) > 0):
                     ?>
                     <div class="divider"></div>
                     <?php
                     endif;
-                    hesk3_output_custom_fields($customFieldsBeforeMessage);
+                    if ( ! $is_den) {
+                        hesk3_output_custom_fields($customFieldsBeforeMessage);
+                    }
 
                     if ($hesk_settings['require_subject'] != -1 || $hesk_settings['require_message'] != -1): ?>
+                        <?php if ($is_den): ?>
+                        <!-- 2. Description of the facts -->
+                        <div class="ut-den-card">
+                            <h2 class="ut-den-card__title"><span class="ut-den-step">2</span> <?php echo $hesklang['ut_den_s2']; ?></h2>
+                            <p class="ut-den-card__hint"><?php echo $hesklang['ut_den_s2_hint']; ?></p>
+                            <ul class="ut-den-guide">
+                                <li><?php echo $hesklang['ut_den_g1']; ?></li>
+                                <li><?php echo $hesklang['ut_den_g2']; ?></li>
+                                <li><?php echo $hesklang['ut_den_g3']; ?></li>
+                                <li><?php echo $hesklang['ut_den_g4']; ?></li>
+                            </ul>
+                        <?php else: ?>
                         <div class="divider"></div>
+                        <?php endif; ?>
                         <?php if ($hesk_settings['require_subject'] != -1): ?>
                             <div class="form-group">
                                 <label class="label <?php if ($hesk_settings['require_subject']) { ?>required<?php } ?>">
-                                    <?php echo $hesklang['subject']; ?>:
+                                    <?php echo $is_den ? $hesklang['ut_den_subject'] : $hesklang['subject']; ?>:
                                 </label>
                                 <input type="text" class="form-control <?php if (in_array('subject',$_SESSION['iserror'])) {echo 'isError';} ?>"
-                                       name="subject" maxlength="70"
+                                       name="subject" maxlength="70"<?php echo $is_den ? ' placeholder="'.$hesklang['ut_den_subject_ph'].'"' : ''; ?>
                                        value="<?php if (isset($_SESSION['c_subject'])) {echo stripslashes(hesk_input($_SESSION['c_subject']));} ?>"
                                        <?php if ($hesk_settings['require_subject']) { ?>required<?php } ?>>
                             </div>
@@ -263,7 +321,7 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                         if ($hesk_settings['require_message'] != -1): ?>
                             <div class="form-group">
                                 <label class="label <?php if ($hesk_settings['require_message']) { ?>required<?php } ?>">
-                                    <?php echo $hesklang['message']; ?>:
+                                    <?php echo $is_den ? $hesklang['ut_den_message'] : $hesklang['message']; ?>:
                                 </label>
                                 <textarea class="form-control <?php if (in_array('message',$_SESSION['iserror'])) {echo 'isError';} ?>"
                                           name="message" rows="12" cols="60"
@@ -281,6 +339,9 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                             </div>
                             <?php
                         endif;
+                        if ($is_den): ?>
+                        </div>
+                        <?php endif;
                     endif;
 
                     if (count($visibleCustomFieldsAfterMessage) > 0): ?>
@@ -292,7 +353,13 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
 
                     if ($hesk_settings['attachments']['use']):
                     ?>
+                        <?php if ($is_den): ?>
+                        <div class="ut-den-card">
+                            <h2 class="ut-den-card__title"><span class="ut-den-step">3</span> <?php echo $hesklang['ut_den_s3']; ?></h2>
+                            <p class="ut-den-card__hint"><?php echo $hesklang['ut_den_s3_hint']; ?></p>
+                        <?php else: ?>
                         <div class="divider"></div>
+                        <?php endif; ?>
                         <section class="param param--attach">
                             <span class="label"><?php echo $hesklang['attachments']; ?>:</span>
                             <div class="attach">
@@ -306,14 +373,23 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                                 </div>
                             </div>
                         </section>
+                        <?php if ($is_den): ?>
+                        </div>
+                        <?php else: ?>
                         <div class="divider"></div>
-                        <?php
+                        <?php endif;
                     endif;
 
                     if ($hesk_settings['question_use'] || ($hesk_settings['secimg_use'] && $hesk_settings['recaptcha_use'] !== 1)):
                     ?>
+                    <?php if ($is_den): ?>
+                    <div class="captcha-block ut-den-card ut-den-captcha">
+                        <h2 class="ut-den-card__title"><?php echo $hesklang['ut_den_verify']; ?></h2>
+                        <p class="ut-den-card__hint"><?php echo $hesklang['ut_den_verify_hint']; ?></p>
+                    <?php else: ?>
                     <div class="captcha-block">
                         <h3><?php echo $hesklang['verify_header']; ?></h3>
+                    <?php endif; ?>
 
                         <?php if ($hesk_settings['question_use']): ?>
                         <div class="form-group">
@@ -369,7 +445,9 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                             }
                             ?>
                     </div>
+                    <?php if ( ! $is_den): ?>
                     <div class="divider"></div>
+                    <?php endif; ?>
                         <?php
                     endif;
 
@@ -393,12 +471,26 @@ require_once(TEMPLATE_PATH . 'customer/util/attachments.php');
                     <?php endif; ?>
 
 
-                    <div class="form-footer">
+                    <?php if ($is_den): ?>
+                    <!-- 4. Good-faith declaration (checked in the browser before sending) -->
+                    <div class="ut-den-card">
+                        <h2 class="ut-den-card__title"><span class="ut-den-step"><?php echo $hesk_settings['attachments']['use'] ? 4 : 3; ?></span> <?php echo $hesklang['ut_den_s4']; ?></h2>
+                        <label class="ut-den-decl">
+                            <input type="checkbox" name="ut_den_decl" value="1" required>
+                            <span><?php echo $hesklang['ut_den_decl']; ?></span>
+                        </label>
+                    </div>
+                    <?php endif; ?>
+
+                    <div class="form-footer<?php echo $is_den ? ' ut-den-footer' : ''; ?>">
                         <input type="hidden" name="token" value="<?php hesk_token_echo(); ?>">
                         <input type="hidden" name="category" value="<?php echo $categoryId; ?>">
                         <button type="submit" class="btn btn-full" ripple="ripple" id="recaptcha-submit">
-                            <?php echo $hesklang['sub_ticket']; ?>
+                            <?php echo $is_den ? $hesklang['ut_den_submit'] : $hesklang['sub_ticket']; ?>
                         </button>
+                        <?php if ($is_den): ?>
+                        <p class="ut-den-secure"><?php echo $hesklang['ut_den_secure']; ?></p>
+                        <?php endif; ?>
                         <!-- Do not delete or modify the code below, it is used to detect simple SPAM bots -->
                         <input type="hidden" name="hx" value="3" /><input type="hidden" name="hy" value="">
                         <!-- >

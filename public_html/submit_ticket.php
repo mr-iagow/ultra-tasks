@@ -606,13 +606,15 @@ hesk_cleanSessionVars('c_message');
 hesk_cleanSessionVars('c_question');
 hesk_cleanSessionVars('c_attachments');
 hesk_cleanSessionVars('img_verified');
+hesk_cleanSessionVars('c_identificar');
 
 $messages = hesk_get_messages();
 
 $hesk_settings['render_template'](TEMPLATE_PATH . 'customer/create-ticket/create-ticket-confirmation.php', array(
     'trackingId' => $ticket['trackid'],
     'emailProvided' => $email_available,
-    'messages' => $messages
+    'messages' => $messages,
+    'categoryId' => intval($ticket['category']) // $tmpvar was unset above
 ));
 
 exit();

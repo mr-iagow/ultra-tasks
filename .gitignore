@@ -4,3 +4,11 @@ public_html/cache/*.cache.php
 
 public_html/cache/__latest.txt
 public_html/cache/hesk_export_*.zip
+
+# Anexos enviados por clientes e denunciantes: nunca versionar (só os arquivos de proteção da pasta)
+public_html/attachments/*
+!public_html/attachments/.htaccess
+!public_html/attachments/index.htm
+!public_html/attachments/temp/
+public_html/attachments/temp/*
+!public_html/attachments/temp/index.htm

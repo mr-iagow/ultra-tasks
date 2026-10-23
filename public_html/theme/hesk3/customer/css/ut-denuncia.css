@@ -1,0 +1,412 @@
+/* UltraTasks - Whistleblowing Channel (category 99): form and confirmation. Only applies inside .ut-den-page */
+
+.ut-den-page {
+    --den-ink: #1f2430;
+    --den-muted: #5d6573;
+    --den-line: #e3e6ec;
+    --den-brand: #662D8E;
+    --den-brand-dark: #2b1240;
+    --den-brand-soft: #f4eef8;
+    background: #f5f6f8;
+}
+
+.ut-den-page .main__content > .contr {
+    max-width: 880px;
+}
+
+/* ---------- Institutional header ---------- */
+
+.ut-den-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 22px;
+    margin: 32px 0 18px;
+    padding: 30px 32px;
+    border-radius: 12px;
+    background: var(--den-brand-dark);
+    color: #fff;
+}
+
+.ut-den-shield {
+    flex: 0 0 52px;
+    width: 52px;
+    height: 52px;
+    fill: #fff;
+    opacity: .92;
+}
+
+.ut-den-hero__org {
+    margin: 0 0 4px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    opacity: .75;
+}
+
+.ut-den-hero__title {
+    margin: 0 0 12px;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #fff;
+}
+
+.ut-den-hero__intro {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.6;
+    opacity: .9;
+}
+
+.ut-den-req {
+    margin-bottom: 12px;
+}
+
+/* ---------- Form sections ---------- */
+
+.ut-den-form {
+    padding: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+}
+
+/* The theme limits the form to narrow columns (320px / 570px); the channel uses the full card width */
+.ut-den-form .form-groups {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+}
+
+.ut-den-form .ut-den-card .form-group,
+.ut-den-form .ut-den-card .param {
+    max-width: none;
+    margin-bottom: 20px;
+}
+
+.ut-den-form .ut-den-card .attach,
+.ut-den-form .ut-den-card .dropzone,
+.ut-den-form .ut-den-card .attach .btn {
+    max-width: none;
+    width: 100%;
+}
+
+.ut-den-card {
+    margin-bottom: 16px;
+    padding: 24px 28px;
+    border: 1px solid var(--den-line);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.ut-den-card__title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 6px;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--den-ink);
+}
+
+.ut-den-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 30px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--den-brand);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.ut-den-card__hint {
+    margin: 0 0 16px 42px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--den-muted);
+}
+
+.ut-den-card .form-group,
+.ut-den-card .param {
+    margin-left: 42px;
+}
+
+.ut-den-card .form-control,
+.ut-den-card textarea.form-control {
+    max-width: none;
+    width: 100%;
+}
+
+/* Identification choice */
+.ut-den-choice {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 0 0 4px 42px;
+}
+
+.ut-den-option {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--den-line);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.ut-den-option:hover {
+    border-color: #c9b5d8;
+}
+
+.ut-den-option:has(input:checked) {
+    border-color: var(--den-brand);
+    background: var(--den-brand-soft);
+}
+
+.ut-den-option input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin: 2px 0 0;
+    accent-color: var(--den-brand);
+    cursor: pointer;
+}
+
+.ut-den-option b {
+    display: block;
+    margin-bottom: 4px;
+    font-size: 15px;
+    color: var(--den-ink);
+}
+
+.ut-den-option small {
+    display: block;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--den-muted);
+}
+
+.ut-den-ident {
+    margin-top: 18px;
+    padding-top: 18px;
+    border-top: 1px dashed var(--den-line);
+}
+
+.ut-den-note {
+    margin: 4px 0 0 42px;
+    padding: 10px 14px;
+    border-left: 3px solid var(--den-brand);
+    border-radius: 4px;
+    background: var(--den-brand-soft);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--den-ink);
+}
+
+/* Writing guide */
+.ut-den-guide {
+    margin: -6px 0 18px 42px;
+    padding: 12px 16px 12px 34px;
+    border-radius: 8px;
+    background: #f8f9fb;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--den-ink);
+}
+
+.ut-den-guide li {
+    list-style: disc;
+}
+
+.ut-den-card .param--attach {
+    display: block;
+}
+
+.ut-den-card .param--attach > .label {
+    display: none;
+}
+
+/* Security check (reCAPTCHA / anti-spam question, when enabled in the settings) */
+.ut-den-captcha.captcha-block {
+    text-align: left;
+}
+
+.ut-den-captcha .ut-den-card__title,
+.ut-den-captcha .ut-den-card__hint,
+.ut-den-captcha .form-group {
+    margin-left: 0;
+}
+
+.ut-den-captcha .ut-den-card__title {
+    font-size: 16px;
+}
+
+/* Declaration */
+.ut-den-decl {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 6px 0 0 42px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--den-ink);
+    cursor: pointer;
+}
+
+.ut-den-decl input {
+    flex: 0 0 auto;
+    width: 18px;
+    height: 18px;
+    margin: 2px 0 0;
+    accent-color: var(--den-brand);
+}
+
+/* Submit */
+.ut-den-footer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 8px 0 40px;
+}
+
+.ut-den-footer .btn {
+    min-width: 260px;
+    height: 48px;
+    font-size: 16px;
+}
+
+.ut-den-secure {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: var(--den-muted);
+    text-align: center;
+}
+
+/* ---------- Confirmation ---------- */
+
+.ut-den-done {
+    margin: 30px auto 40px;
+    padding: 36px 36px 32px;
+    border: 1px solid var(--den-line);
+    border-top: 6px solid var(--den-brand);
+    border-radius: 12px;
+    background: #fff;
+    text-align: center;
+}
+
+.ut-den-done .ut-den-shield {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 10px;
+    fill: var(--den-brand);
+}
+
+.ut-den-done .ut-den-hero__org {
+    color: var(--den-brand);
+    opacity: 1;
+}
+
+.ut-den-done__title {
+    margin: 0 0 10px;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--den-ink);
+}
+
+.ut-den-done__text {
+    max-width: 560px;
+    margin: 0 auto 22px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--den-muted);
+}
+
+.ut-den-protocol {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 14px;
+    padding: 14px 20px;
+    border: 1px dashed var(--den-brand);
+    border-radius: 10px;
+    background: var(--den-brand-soft);
+}
+
+.ut-den-protocol span {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--den-muted);
+}
+
+.ut-den-protocol strong {
+    font-size: 26px;
+    letter-spacing: .06em;
+    color: var(--den-brand-dark);
+}
+
+.ut-den-copy {
+    padding: 6px 14px;
+    border: 1px solid var(--den-brand);
+    border-radius: 6px;
+    background: #fff;
+    color: var(--den-brand);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.ut-den-copy:hover {
+    background: var(--den-brand);
+    color: #fff;
+}
+
+.ut-den-keep {
+    max-width: 560px;
+    margin: 16px auto 24px;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--den-ink);
+}
+
+.ut-den-done .btn {
+    display: inline-flex;
+    width: auto;
+    min-width: 240px;
+}
+
+/* ---------- Small screens ---------- */
+
+@media screen and (max-width: 760px) {
+    .ut-den-hero {
+        flex-direction: column;
+        padding: 24px 20px;
+    }
+    .ut-den-hero__title {
+        font-size: 23px;
+    }
+    .ut-den-card {
+        padding: 20px 16px;
+    }
+    .ut-den-card__hint,
+    .ut-den-card .form-group,
+    .ut-den-card .param,
+    .ut-den-choice,
+    .ut-den-note,
+    .ut-den-guide,
+    .ut-den-decl {
+        margin-left: 0;
+    }
+    .ut-den-choice {
+        grid-template-columns: 1fr;
+    }
+}
