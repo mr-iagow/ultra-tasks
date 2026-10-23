@@ -1,0 +1,359 @@
+/* UltraTasks - team page (manage_users.php). Only applies inside .ut-team */
+
+/* ---------- Header ---------- */
+
+.ut-team.main__content.team {
+    padding: 20px 28px 50px 20px;
+}
+
+/* The base theme reserves 200px on the right for an old floating button */
+.ut-team.main__content.team .team__head,
+.ut-team.main__content.team .table-wrap {
+    margin-right: 0;
+}
+
+.ut-team.main__content.team .team__head h2 {
+    padding-left: 0;
+}
+
+.ut-team.main__content.team .team__head .btn {
+    min-width: 0;
+}
+
+.ut-team .ut-team__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px 24px;
+    margin-bottom: 14px;
+    padding: 18px 22px;
+    background: #fff;
+    border: 1px solid var(--ut-line);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.ut-team .ut-team__head h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.ut-team__summary {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: var(--ut-muted);
+}
+
+.ut-team__actions,
+.ut-team__bulk {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.ut-team .ut-team__head .btn {
+    width: auto;
+    height: 40px;
+    margin: 0;
+    padding: 0 16px;
+    white-space: nowrap;
+}
+
+/* Bulk actions are secondary: smaller and quieter than "New team member" */
+.ut-team .ut-team__bulk .btn {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 13px;
+}
+
+.ut-team__bulk {
+    padding-right: 10px;
+    border-right: 1px solid var(--ut-line);
+}
+
+/* ---------- Search and role filter ---------- */
+
+.ut-team__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-bottom: 14px;
+}
+
+.ut-team__search {
+    position: relative;
+    flex: 0 1 420px;
+}
+
+.ut-team__search .icon-search {
+    position: absolute;
+    left: 13px;
+    top: 12px;
+    width: 16px;
+    height: 16px;
+    fill: var(--ut-muted);
+    pointer-events: none;
+}
+
+.ut-team__search .form-control {
+    box-sizing: border-box;
+    width: 100%;
+    height: 40px;
+    padding: 0 12px 0 38px;
+    border: 1px solid var(--ut-line);
+    border-radius: 8px;
+    background: #fff;
+}
+
+.ut-team__search .form-control:focus {
+    border-color: var(--ut-purple);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--ut-purple-soft);
+}
+
+.ut-team__roles {
+    display: flex;
+    gap: 6px;
+}
+
+.ut-team__role {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid var(--ut-line);
+    border-radius: 17px;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ut-text);
+    cursor: pointer;
+}
+
+.ut-team__role span {
+    min-width: 20px;
+    padding: 1px 6px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    background: #f1f2f5;
+    font-size: 11px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.ut-team__role:hover {
+    border-color: #c9b5d8;
+}
+
+.ut-team__role.is-active {
+    border-color: var(--ut-purple);
+    background: var(--ut-purple-soft);
+    color: var(--ut-purple);
+    font-weight: 700;
+}
+
+.ut-team__role.is-active span {
+    background: var(--ut-purple);
+    color: #fff;
+}
+
+/* ---------- Table ---------- */
+
+.ut-team .table-wrap {
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--ut-line);
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, .04);
+}
+
+.ut-team .table-wrap .table {
+    margin: 0;
+}
+
+.ut-team #default-table thead th {
+    padding: 12px 14px;
+    background: #fafbfc;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ut-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.ut-team #default-table tbody td {
+    padding: 10px 14px;
+    border-top: 1px solid var(--ut-line);
+    vertical-align: middle;
+    font-size: 13px;
+}
+
+.ut-team #default-table tbody tr:hover {
+    background: #faf7fc;
+}
+
+.ut-team #default-table tbody tr[hidden] {
+    display: none;
+}
+
+.ut-team__member {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 240px;
+}
+
+.ut-team__member .ut-avatar {
+    width: 34px;
+    height: 34px;
+    font-size: 12px;
+}
+
+.ut-team__name {
+    font-weight: 700;
+    color: var(--ut-text);
+}
+
+.ut-team__email {
+    font-size: 12px;
+    color: var(--ut-muted);
+    text-decoration: none;
+}
+
+.ut-team__email:hover {
+    color: var(--ut-purple);
+    text-decoration: underline;
+}
+
+.ut-team__user {
+    color: var(--ut-muted);
+}
+
+.ut-team__badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.ut-team__badge.is-admin {
+    background: var(--ut-purple);
+    color: #fff;
+}
+
+.ut-team__badge.is-staff {
+    background: var(--ut-purple-soft);
+    color: var(--ut-purple);
+}
+
+.ut-team__badge.is-on {
+    background: #e7f7ef;
+    color: #1f8a57;
+}
+
+.ut-team__badge.is-off {
+    background: #f1f2f5;
+    color: var(--ut-muted);
+}
+
+.ut-team__mfa {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ut-team__tk {
+    display: block;
+}
+
+.ut-team__tk b {
+    color: var(--ut-purple);
+}
+
+.ut-team__muted {
+    display: block;
+    font-size: 12px;
+    color: var(--ut-muted);
+}
+
+.ut-team__empty {
+    margin: 0;
+    padding: 30px;
+    text-align: center;
+    color: var(--ut-muted);
+}
+
+/* ---------- Footer: range and pages ---------- */
+
+.ut-team__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-top: 14px;
+}
+
+.ut-team__range {
+    font-size: 13px;
+    color: var(--ut-muted);
+}
+
+.ut-team__pages {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.ut-team__pages button {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    border: 1px solid var(--ut-line);
+    border-radius: 6px;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ut-text);
+    cursor: pointer;
+}
+
+.ut-team__pages button:hover:not(:disabled) {
+    border-color: var(--ut-purple);
+    color: var(--ut-purple);
+}
+
+.ut-team__pages button.is-current {
+    border-color: var(--ut-purple);
+    background: var(--ut-purple);
+    color: #fff;
+    font-weight: 700;
+}
+
+.ut-team__pages button:disabled {
+    opacity: .4;
+    cursor: default;
+}
+
+.ut-team__pages span {
+    padding: 0 4px;
+    color: var(--ut-muted);
+}
+
+@media screen and (max-width: 900px) {
+    .ut-team__bulk {
+        padding-right: 0;
+        border-right: 0;
+    }
+    .ut-team__search {
+        flex-basis: 100%;
+    }
+}

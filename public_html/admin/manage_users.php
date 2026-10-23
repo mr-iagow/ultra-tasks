@@ -176,6 +176,7 @@ if ( $action = hesk_REQUEST('a') )
 	elseif ($action == 'autoassign') {toggle_autoassign();}
     elseif ($action == 'resetmfa')   {reset_mfa();}
     elseif ($action == 'forcepwreset') {force_password_reset_all();}
+    elseif ($action == 'grantexport') {grant_export_all();}
     else 							 {hesk_error($hesklang['invalid_action']);}
 }
 
@@ -258,8 +259,9 @@ if (hesk_dbNumRows($res) > 0)
     hesk_show_notice($hesklang['uue']);
 }
 ?>
-<div class="main__content team">
-    <section class="team__head">
+<div class="main__content team ut-team">
+    <section class="team__head ut-team__head">
+        <div class="ut-team__title">
         <h2>
             <?php echo $hesklang['team']; ?>
             <div class="tooltype right out-close">
@@ -273,8 +275,11 @@ if (hesk_dbNumRows($res) > 0)
                 </div>
             </div>
         </h2>
+        <p class="ut-team__summary" id="utTeamSummary"></p>
+        </div>
         <?php if ($can_man_users): ?>
-        <button class="btn btn btn--blue-border" ripple="ripple" data-action="team-create"><?php echo $hesklang['new_team_member']; ?></button>
+        <div class="ut-team__actions">
+        <div class="ut-team__bulk">
         <?php
         $force_pwreset_modal_id = hesk_generate_delete_modal($hesklang['pass_reset_forced_all_title'],
             $hesklang['pass_reset_forced_all_confirm'],
@@ -282,17 +287,45 @@ if (hesk_dbNumRows($res) > 0)
             $hesklang['pass_reset_forced_all_yes']);
         ?>
         <a href="javascript:" data-modal="[data-modal-id='<?php echo $force_pwreset_modal_id; ?>']" class="btn btn btn--blue-border"><?php echo $hesklang['pass_reset_forced_all_button']; ?></a>
+        <?php
+        // Staff can only give permissions they have themselves
+        if (hesk_checkPermission('can_export', 0)):
+            $grant_export_modal_id = hesk_generate_delete_modal($hesklang['ut_grant_export_title'],
+                $hesklang['ut_grant_export_confirm'],
+                'manage_users.php?a=grantexport&amp;token='.hesk_token_echo(0),
+                $hesklang['ut_grant_export_yes']);
+        ?>
+        <a href="javascript:" data-modal="[data-modal-id='<?php echo $grant_export_modal_id; ?>']" class="btn btn btn--blue-border"><?php echo $hesklang['ut_grant_export_button']; ?></a>
         <?php endif; ?>
+        </div>
+        <button class="btn btn-full" ripple="ripple" data-action="team-create"><?php echo $hesklang['new_team_member']; ?></button>
+        </div>
+        <?php endif; ?>
+    </section>
+
+    <!-- Search and role filter (client side) -->
+    <section class="ut-team__toolbar">
+        <div class="ut-team__search">
+            <svg class="icon icon-search">
+                <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-search"></use>
+            </svg>
+            <input type="text" class="form-control" id="utTeamSearch" placeholder="<?php echo $hesklang['ut_team_search']; ?>" autocomplete="off">
+        </div>
+        <div class="ut-team__roles" role="group">
+            <button type="button" class="ut-team__role is-active" data-role=""><?php echo $hesklang['ut_team_all']; ?> <span></span></button>
+            <button type="button" class="ut-team__role" data-role="admin"><?php echo $hesklang['ut_team_admins']; ?> <span></span></button>
+            <button type="button" class="ut-team__role" data-role="staff"><?php echo $hesklang['staff']; ?> <span></span></button>
+        </div>
     </section>
     <div class="table-wrap">
         <div class="table">
             <table id="default-table" class="table sindu-table">
                 <thead>
                 <tr>
-                    <th><?php echo $hesklang['name']; ?></th>
-                    <th><?php echo $hesklang['email']; ?></th>
+                    <th><?php echo $hesklang['ut_team_member']; ?></th>
                     <th><?php echo $hesklang['username']; ?></th>
                     <th><?php echo $hesklang['role']; ?></th>
+                    <th><?php echo $hesklang['ut_team_tickets']; ?></th>
                     <?php
                     /* Is user rating enabled? */
                     if ($hesk_settings['rating']) {
@@ -348,9 +381,12 @@ if (hesk_dbNumRows($res) > 0)
                         continue;
                     }
 
-                    $table_row = '';
+                    $is_admin_row = (bool) $myuser['isadmin'];
+                    $plain_name = $myuser['name'];
+
+                    $table_row = 'data-role="'.($is_admin_row ? 'admin' : 'staff').'" data-search="'.hesk_htmlspecialchars(hesk_mb_strtolower(hesk_html_entity_decode($myuser['name'].' '.$myuser['email'].' '.$myuser['user']))).'"';
                     if (isset($_SESSION['seluser']) && $myuser['id'] == $_SESSION['seluser']) {
-                        $table_row = 'class="ticket-new"';
+                        $table_row .= ' class="ticket-new"';
                         unset($_SESSION['seluser']);
                     }
 
@@ -474,12 +510,26 @@ if (hesk_dbNumRows($res) > 0)
                         $autoassign_code = '';
                     }
 
+                    // Member cell: initials, name and e-mail; open / total tickets owned
+                    $initials = ut_team_initials($plain_name);
+                    $role_class = $is_admin_row ? 'is-admin' : 'is-staff';
+                    $tk = isset($tickets_per_user[$myuser['id']]) ? $tickets_per_user[$myuser['id']] : array('open' => 0, 'total' => 0);
+                    $tickets_cell = '<span class="ut-team__tk"><b>'.intval($tk['open']).'</b> '.$hesklang[intval($tk['open']) == 1 ? 'ut_team_open_one' : 'ut_team_open'].'</span><span class="ut-team__muted">'.sprintf($hesklang['ut_team_total'], intval($tk['total'])).'</span>';
+
                     echo <<<EOC
 <tr $table_row>
-<td>$myuser[name]</td>
-<td><a href="mailto:$myuser[email]">$myuser[email]</a></td>
-<td>$myuser[user]</td>
-<td>$myuser[isadmin]</td>
+<td>
+    <div class="ut-team__member">
+        <span class="ut-avatar">$initials</span>
+        <div>
+            <div class="ut-team__name">$myuser[name]</div>
+            <a class="ut-team__email" href="mailto:$myuser[email]">$myuser[email]</a>
+        </div>
+    </div>
+</td>
+<td class="ut-team__user">$myuser[user]</td>
+<td><span class="ut-team__badge $role_class">$myuser[isadmin]</span></td>
+<td class="nowrap">$tickets_cell</td>
 
 EOC;
 
@@ -533,8 +583,9 @@ EOC;
                         }
                     }
 
+                    $mfa_class = $mfa_enrollment ? 'is-on' : 'is-off';
                     echo <<<EOC
-<td>$mfa_status $mfa_reset</td>
+<td><div class="ut-team__mfa"><span class="ut-team__badge $mfa_class">$mfa_status</span> $mfa_reset</div></td>
 <td class="nowrap buttons"><p>$edit_code $remove_code</p></td>
 </tr>
 
@@ -543,9 +594,116 @@ EOC;
                 ?>
                 </tbody>
             </table>
+            <p class="ut-team__empty" id="utTeamEmpty" hidden><?php echo $hesklang['ut_team_empty']; ?></p>
         </div>
     </div>
+    <div class="ut-team__footer" id="utTeamFooter">
+        <span class="ut-team__range" id="utTeamRange"></span>
+        <nav class="ut-team__pages" id="utTeamPages" aria-label="<?php echo $hesklang['ut_team_pages']; ?>"></nav>
+    </div>
 </div>
+<script>
+(function () {
+    var PER_PAGE = 25;
+    var rows = Array.prototype.slice.call(document.querySelectorAll('#default-table tbody tr[data-role]'));
+    var search = document.getElementById('utTeamSearch');
+    var roles = document.querySelectorAll('.ut-team__role');
+    var empty = document.getElementById('utTeamEmpty');
+    var rangeEl = document.getElementById('utTeamRange');
+    var pagesEl = document.getElementById('utTeamPages');
+    var role = '';
+    var page = 1;
+
+    var count = { '': rows.length, admin: 0, staff: 0 };
+    rows.forEach(function (r) { count[r.dataset.role]++; });
+    roles.forEach(function (b) { b.querySelector('span').textContent = count[b.dataset.role]; });
+    document.getElementById('utTeamSummary').textContent = <?php echo json_encode($hesklang['ut_team_summary']); ?>
+        .replace('%1', count['']).replace('%2', count.admin).replace('%3', count.staff);
+
+    // Rows that match the search and role filter
+    function matching() {
+        var term = search.value.trim().toLowerCase();
+        return rows.filter(function (r) {
+            return (!role || r.dataset.role === role) && (!term || r.dataset.search.indexOf(term) !== -1);
+        });
+    }
+
+    function pageButton(p, label, current, disabled) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.innerHTML = label;
+        if (current) {
+            b.className = 'is-current';
+            b.setAttribute('aria-current', 'page');
+        }
+        if (disabled) {
+            b.disabled = true;
+        } else {
+            b.addEventListener('click', function () {
+                page = p;
+                render();
+                document.querySelector('.ut-team__toolbar').scrollIntoView({ block: 'start', behavior: 'smooth' });
+            });
+        }
+        return b;
+    }
+
+    function render() {
+        var list = matching();
+        var pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+        page = Math.min(Math.max(1, page), pages);
+        var first = (page - 1) * PER_PAGE;
+        var visible = list.slice(first, first + PER_PAGE);
+
+        rows.forEach(function (r) { r.hidden = visible.indexOf(r) === -1; });
+        empty.hidden = list.length > 0;
+
+        rangeEl.textContent = list.length
+            ? <?php echo json_encode($hesklang['ut_team_range']); ?>.replace('%1', first + 1).replace('%2', first + visible.length).replace('%3', list.length)
+            : '';
+
+        // Previous, first, window of pages around the current one, last, next
+        pagesEl.innerHTML = '';
+        if (pages > 1) {
+            pagesEl.appendChild(pageButton(page - 1, '&lsaquo;', false, page === 1));
+            var from = Math.max(1, page - 2), to = Math.min(pages, page + 2);
+            // "…" only hides two or more pages; a single missing page is shown instead
+            if (from === 3) from = 2;
+            if (to === pages - 2) to = pages - 1;
+            if (from > 1) {
+                pagesEl.appendChild(pageButton(1, '1', false, false));
+                if (from > 2) pagesEl.appendChild(Object.assign(document.createElement('span'), { textContent: '…' }));
+            }
+            for (var p = from; p <= to; p++) {
+                pagesEl.appendChild(pageButton(p, String(p), p === page, false));
+            }
+            if (to < pages) {
+                if (to < pages - 1) pagesEl.appendChild(Object.assign(document.createElement('span'), { textContent: '…' }));
+                pagesEl.appendChild(pageButton(pages, String(pages), false, false));
+            }
+            pagesEl.appendChild(pageButton(page + 1, '&rsaquo;', false, page === pages));
+        }
+    }
+
+    search.addEventListener('input', function () { page = 1; render(); });
+    roles.forEach(function (b) {
+        b.addEventListener('click', function () {
+            roles.forEach(function (x) { x.classList.remove('is-active'); });
+            b.classList.add('is-active');
+            role = b.dataset.role;
+            page = 1;
+            render();
+        });
+    });
+
+    // After creating or editing a user, open the page where that user is highlighted
+    var highlighted = document.querySelector('#default-table tbody tr.ticket-new');
+    if (highlighted) {
+        page = Math.floor(rows.indexOf(highlighted) / PER_PAGE) + 1;
+    }
+    render();
+})();
+</script>
 <?php if ($can_man_users): ?>
 <div class="right-bar team-create" <?php echo hesk_SESSION(array('userdata','errors')) ? 'style="display: block"' : ''; ?>>
     <div class="right-bar__body form" data-step="1">
@@ -586,6 +744,19 @@ exit();
 
 
 /*** START FUNCTIONS ***/
+
+
+// Up to two initials for the member avatar
+function ut_team_initials($name)
+{
+    $parts = preg_split('/\s+/', trim(hesk_html_entity_decode($name)));
+    $out = hesk_mb_substr($parts[0], 0, 1);
+    if (count($parts) > 1)
+    {
+        $out .= hesk_mb_substr(end($parts), 0, 1);
+    }
+    return hesk_htmlspecialchars(hesk_mb_strtoupper($out));
+}
 
 
 function compare_user_permissions($compare_id, $compare_isadmin = null, $compare_categories = null, $compare_features = null)
@@ -1271,5 +1442,22 @@ function force_password_reset_all() {
     hesk_dbQuery("UPDATE `".hesk_dbEscape($hesk_settings['db_pfix'])."users` SET `pass_reset_required` = '1'");
 
     hesk_process_messages($hesklang['pass_reset_forced_all'], './manage_users.php', 'SUCCESS');
+}
+
+// Gives "can export tickets" to every staff member (admins already have every permission)
+function grant_export_all() {
+    global $hesk_settings, $hesklang;
+
+    /* A security check */
+    hesk_token_check();
+
+    // Staff can only give permissions they have themselves
+    hesk_checkPermission('can_export');
+
+    hesk_dbQuery("UPDATE `".hesk_dbEscape($hesk_settings['db_pfix'])."users`
+                  SET `heskprivileges` = IF(`heskprivileges` = '', 'can_export', CONCAT(`heskprivileges`, ',can_export'))
+                  WHERE `isadmin` = '0' AND CONCAT(',', `heskprivileges`, ',') NOT LIKE '%,can_export,%'");
+
+    hesk_process_messages(sprintf($hesklang['ut_grant_export_done'], hesk_dbAffectedRows()), './manage_users.php', 'SUCCESS');
 }
 ?>
