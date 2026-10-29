@@ -20,7 +20,7 @@ $num_mail = hesk_checkNewMail();
 $calling_script = basename($_SERVER['PHP_SELF'], '.php');
 ?>
 <!-- NEW DESIGN -->
-<aside class="main-menu">
+<aside class="main-menu ut-nav">
     <nav class="navbar">
         <div class="navbar__header">
             <button class="btn navbar__toggler" id="navbarToggler" type="button" aria-label="Toggle navigation">
@@ -36,6 +36,7 @@ $calling_script = basename($_SERVER['PHP_SELF'], '.php');
         </div>
         <div class="navbar__menu-wrap">
             <ul class="navbar__list">
+                <li class="ut-nav-label"><?php echo $hesklang['ut_nav_service']; ?></li>
                 <li class="listitem <?php if ($calling_script === 'admin_main') { ?>current<?php } ?>">
                     <div class="listitem__icon">
                         <a href="admin_main.php">
@@ -178,6 +179,7 @@ $calling_script = basename($_SERVER['PHP_SELF'], '.php');
                 </li>
                 <?php } ?>
                 <li class="separator"></li>
+                <li class="ut-nav-label"><?php echo $hesklang['ut_nav_manage']; ?></li>
                 <?php if (hesk_checkPermission('can_man_users',0) || hesk_checkPermission('can_view_users',0)) { ?>
                 <li class="listitem <?php if ($calling_script === 'manage_users') { ?>current<?php } ?>">
                     <div class="listitem__icon">
@@ -350,6 +352,7 @@ $calling_script = basename($_SERVER['PHP_SELF'], '.php');
                     $open_menu = in_array($calling_script, $pages) ? 'current submenu-is-opened' : '';
                 ?>
                 <li class="separator"></li>
+                <li class="ut-nav-label"><?php echo $hesklang['ut_nav_system']; ?></li>
                 <li class="listitem submenu <?php echo $open_menu; ?>">
                     <div class="listitem__icon">
                         <a href="#">

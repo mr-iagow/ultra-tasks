@@ -1,0 +1,308 @@
+/* UltraTasks - left navigation (inc/show_admin_nav.inc.php). Only applies inside .main-menu.ut-nav.
+   Visual only: markup classes used by js/app.js (.listitem.submenu, .submenu-is-opened, .is-toggled) are unchanged. */
+
+.main-menu.ut-nav {
+    --nav-bg: #1f1029;
+    --nav-text: rgba(255, 255, 255, .72);
+    --nav-muted: rgba(255, 255, 255, .38);
+    --nav-hover: rgba(255, 255, 255, .07);
+    --nav-open: rgba(255, 255, 255, .04);
+    --nav-active: #662D8E;
+    --nav-flyout: #2b1640;
+    background-color: var(--nav-bg);
+    color: var(--nav-text);
+}
+
+/* ---------- Fixed menu: only the page content scrolls ---------- */
+
+@media screen and (min-width: 900px) {
+    /* Fixed to the window: does not move with vertical or horizontal page scroll,
+       and stays above the content (fly-out menus of the collapsed state) */
+    .main-menu.ut-nav {
+        position: fixed;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        z-index: 20;
+        width: 240px;
+        /* A long menu (open submenus) scrolls on its own */
+        overflow-x: hidden;
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, .18) transparent;
+    }
+
+    .main-menu.ut-nav.is-toggled {
+        width: 72px;
+    }
+
+    /* Room for the fixed menu next to the content */
+    .wrapper:has(> .main-menu.ut-nav) {
+        box-sizing: border-box;
+        padding-left: 240px;
+    }
+
+    .wrapper:has(> .main-menu.ut-nav.is-toggled) {
+        padding-left: 72px;
+    }
+
+    .main-menu.ut-nav::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .main-menu.ut-nav::-webkit-scrollbar-thumb {
+        border-radius: 3px;
+        background: rgba(255, 255, 255, .18);
+    }
+
+    /* Collapsed: the fly-out menus open to the side and must not be clipped */
+    .main-menu.ut-nav.is-toggled {
+        overflow: visible;
+    }
+}
+
+/* ---------- Header: toggler + name ---------- */
+
+.ut-nav .navbar__header {
+    height: 68px;
+    border-bottom: 1px solid rgba(255, 255, 255, .06);
+}
+
+.ut-nav .navbar__toggler {
+    color: var(--nav-muted);
+}
+
+.ut-nav .navbar__toggler .icon:hover {
+    color: #fff;
+}
+
+.ut-nav .navbar__logo {
+    color: #fff !important;
+    font-size: 22px;
+    letter-spacing: .01em;
+}
+
+/* ---------- Sections ---------- */
+
+.ut-nav .navbar__list {
+    padding: 6px 0 24px;
+}
+
+.ut-nav .navbar__list li {
+    margin-bottom: 2px;
+}
+
+.ut-nav .ut-nav-label {
+    padding: 18px 22px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--nav-muted);
+}
+
+/* A section with no item for this user does not show its title */
+.ut-nav .ut-nav-label:last-child,
+.ut-nav .ut-nav-label:has(+ .separator),
+.ut-nav .ut-nav-label:has(+ .ut-nav-label) {
+    display: none;
+}
+
+/* Titles replace the separator lines while the menu is expanded */
+.ut-nav .navbar__list li.separator:not(.mobile) {
+    display: none;
+}
+
+/* ---------- Items ---------- */
+
+.ut-nav .listitem {
+    margin-left: 10px;
+    margin-right: 10px;
+    border-radius: 8px;
+    transition: background-color 150ms ease;
+}
+
+.ut-nav .listitem__icon,
+.ut-nav .listitem__icon a {
+    height: 42px;
+}
+
+.ut-nav .listitem__icon {
+    width: 50px;
+}
+
+.ut-nav .listitem__icon .icon {
+    width: 20px;
+    height: 20px;
+}
+
+/* Same total width as the original menu (240px): 10 + 50 + 170 + 10 */
+.ut-nav .listitem__menu {
+    flex: 0 0 170px;
+    width: 170px;
+    min-width: 0;
+}
+
+.ut-nav .listitem__caption,
+.ut-nav .submenu__listitem {
+    white-space: nowrap;
+}
+
+.ut-nav .listitem__caption {
+    height: 42px;
+    padding-right: 28px;
+    font-size: 14px;
+}
+
+.ut-nav .listitem:hover {
+    background-color: var(--nav-hover);
+    color: #fff;
+}
+
+.ut-nav .navbar__list li.submenu-is-opened {
+    background-color: var(--nav-open);
+}
+
+/* Current page: brand purple */
+.ut-nav .listitem.current:not(.submenu) {
+    background-color: var(--nav-active) !important;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(102, 45, 142, .45);
+}
+
+.ut-nav .listitem.current .listitem__icon,
+.ut-nav .listitem.current .listitem__menu > a {
+    color: #fff;
+}
+
+/* Parent of the current page (submenu) */
+.ut-nav .listitem.submenu.current {
+    background-color: var(--nav-open) !important;
+    color: #fff;
+}
+
+/* Submenu arrow */
+.ut-nav .listitem.submenu:after {
+    top: 19px;
+    right: 14px;
+}
+
+/* ---------- Submenu ---------- */
+
+.ut-nav .submenu__list {
+    margin: 0 0 8px 2px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255, 255, 255, .12);
+}
+
+.ut-nav .submenu__listitem {
+    height: 34px;
+    margin: 1px 0;
+    padding-left: 10px;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* The base theme paints the hover on a 200% wide pseudo element */
+.ut-nav .submenu__listitem:before,
+.ut-nav .submenu__listitem:hover:before {
+    background: none;
+}
+
+.ut-nav .submenu__listitem:hover {
+    background-color: var(--nav-hover);
+    color: #fff;
+}
+
+.ut-nav .navbar__list li .submenu__list .submenu__listitem.current {
+    background-color: var(--nav-active);
+    color: #fff;
+    font-weight: 700;
+}
+
+.ut-nav .navbar__list li .submenu__list .submenu__listitem.current::before {
+    display: none;
+}
+
+.ut-nav .submenu__listitem a {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Unread messages badge */
+.ut-nav .listitem__notification {
+    top: 9px;
+    right: 10px;
+    background: var(--nav-active);
+    color: #fff;
+}
+
+/* ---------- Collapsed menu (icons only) ---------- */
+
+@media screen and (min-width: 900px) {
+    /* Separator of the mobile-only items (messages, profile) */
+    .ut-nav .navbar__list li.separator.mobile {
+        display: none;
+    }
+
+    .main-menu.ut-nav.is-toggled .ut-nav-label {
+        display: none;
+    }
+
+    .main-menu.ut-nav.is-toggled .navbar__list li.separator:not(.mobile) {
+        display: block;
+        margin: 10px 16px;
+        opacity: .1;
+    }
+
+    .main-menu.ut-nav.is-toggled .listitem {
+        width: 52px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .main-menu.ut-nav.is-toggled .listitem__icon {
+        width: 52px;
+        border-radius: 8px;
+    }
+
+    .main-menu.ut-nav.is-toggled .listitem:hover .listitem__icon {
+        background-color: var(--nav-hover);
+    }
+
+    /* Fly-out with the item name and its submenu */
+    .main-menu.ut-nav.is-toggled .listitem__menu {
+        left: calc(100% + 8px);
+        padding: 6px;
+        border-radius: 10px;
+        background-color: var(--nav-flyout);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+    }
+
+    .main-menu.ut-nav.is-toggled .listitem:hover .listitem__menu {
+        width: 200px;
+    }
+
+    .main-menu.ut-nav.is-toggled .listitem__menu .listitem__caption,
+    .main-menu.ut-nav.is-toggled .listitem__menu .submenu__listitem {
+        padding-left: 12px;
+    }
+
+    .main-menu.ut-nav.is-toggled .listitem__menu .listitem__caption[href="#"] {
+        background: none;
+        color: var(--nav-muted);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        height: 32px;
+    }
+
+    .main-menu.ut-nav.is-toggled .submenu__list {
+        margin: 0;
+        padding-left: 0;
+        border-left: 0;
+    }
+}

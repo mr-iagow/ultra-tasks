@@ -51,6 +51,8 @@ $onload='';
     <link rel="stylesheet" media="all" href="<?php echo HESK_PATH; ?>css/ticket_new.css?<?php echo filemtime(HESK_PATH . 'css/ticket_new.css'); ?>">
     <link rel="stylesheet" media="all" href="<?php echo HESK_PATH; ?>css/ut_reports.css?<?php echo filemtime(HESK_PATH . 'css/ut_reports.css'); ?>">
     <link rel="stylesheet" media="all" href="<?php echo HESK_PATH; ?>css/ut_team.css?<?php echo filemtime(HESK_PATH . 'css/ut_team.css'); ?>">
+    <link rel="stylesheet" media="all" href="<?php echo HESK_PATH; ?>css/ut_nav.css?<?php echo filemtime(HESK_PATH . 'css/ut_nav.css'); ?>">
+    <link rel="stylesheet" media="all" href="<?php echo HESK_PATH; ?>css/ut_cats.css?<?php echo filemtime(HESK_PATH . 'css/ut_cats.css'); ?>">
     <script src="<?php echo HESK_PATH; ?>js/jquery-3.5.1.min.js"></script>
 	<script type="text/javascript" src="<?php echo HESK_PATH; ?>js/hesk_javascript<?php echo $hesk_settings['debug_mode'] ? '' : '.min'; ?>.js?<?php echo $hesk_settings['hesk_version']; ?>"></script>
     <script src="<?php echo HESK_PATH; ?>js/selectize.min.js"></script>

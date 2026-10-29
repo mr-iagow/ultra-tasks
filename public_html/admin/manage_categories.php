@@ -56,8 +56,9 @@ if (!hesk_SESSION('error')) {
     hesk_handle_messages();
 }
 ?>
-<div class="main__content categories">
-    <section class="categories__head">
+<div class="main__content categories ut-team ut-cats">
+    <section class="categories__head ut-team__head">
+        <div class="ut-team__title">
         <h2>
             <?php echo $hesklang['menu_cat']; ?>
             <div class="tooltype right out-close">
@@ -71,9 +72,39 @@ if (!hesk_SESSION('error')) {
                 </div>
             </div>
         </h2>
-        <a href="manage_category.php" class="btn btn btn--blue-border" ripple="ripple">
+        <p class="ut-team__summary" id="utCatSummary"></p>
+        </div>
+        <a href="manage_category.php" class="btn btn-full" ripple="ripple">
             <?php echo $hesklang['add_cat']; ?>
         </a>
+    </section>
+
+    <!-- Search and filters (client side) -->
+    <section class="ut-team__toolbar">
+        <div class="ut-team__search">
+            <svg class="icon icon-search">
+                <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-search"></use>
+            </svg>
+            <input type="text" class="form-control" id="utCatSearch" placeholder="<?php echo $hesklang['ut_cat_search']; ?>" autocomplete="off">
+        </div>
+        <div class="ut-cats__filters">
+            <div class="ut-team__roles" role="group">
+                <button type="button" class="ut-team__role is-active" data-type=""><?php echo $hesklang['ut_team_all']; ?> <span></span></button>
+                <button type="button" class="ut-team__role" data-type="public"><?php echo $hesklang['ut_cat_publics']; ?> <span></span></button>
+                <button type="button" class="ut-team__role" data-type="private"><?php echo $hesklang['ut_cat_privates']; ?> <span></span></button>
+            </div>
+            <select id="utCatPriority" class="ut-cats__select" aria-label="<?php echo $hesklang['priority']; ?>">
+                <option value=""><?php echo $hesklang['ut_cat_any_priority']; ?></option>
+                <?php foreach (array(0, 1, 2, 3) as $p): ?>
+                    <option value="<?php echo $p; ?>"><?php echo trim($priorities[$p]['text'], ' *'); ?></option>
+                <?php endforeach; ?>
+            </select>
+            <select id="utCatDue" class="ut-cats__select" aria-label="<?php echo $hesklang['category_default_due_date']; ?>">
+                <option value=""><?php echo $hesklang['ut_cat_any_due']; ?></option>
+                <option value="1"><?php echo $hesklang['ut_cat_with_due']; ?></option>
+                <option value="0"><?php echo $hesklang['ut_cat_no_due']; ?></option>
+            </select>
+        </div>
     </section>
     <div class="table-wrap">
         <div class="table">
@@ -101,7 +132,7 @@ if (!hesk_SESSION('error')) {
                         <span><?php echo $hesklang['not']; ?></span>
                     </th>
                     <th>
-                        <span><?php echo $hesklang['cat_type']; ?></span>
+                        <span class="tooltip" title="<?php echo hesk_htmlspecialchars($hesklang['cat_type']); ?>"><?php echo $hesklang['ut_cat_type']; ?></span>
                     </th>
                     <?php if ($hesk_settings['autoassign']): ?>
                     <th><?php echo $hesklang['aass']; ?></th>
@@ -168,14 +199,19 @@ if (!hesk_SESSION('error')) {
 
 
                     ?>
-                    <tr <?php echo $table_row; ?> data-category-id="<?php echo $mycat['id']; ?>" data-autoassign-enabled="<?php echo $mycat['autoassign'] ?>" data-autoassign-config="<?php echo hesk_stripslashes($mycat['autoassign_config']); ?>">
-                        <td><?php echo $mycat['id']; ?></td>
+                    <?php
+                    $has_due = ! ($mycat['default_due_date_amount'] === null && $mycat['default_due_date_unit'] === null);
+                    $row_data = 'data-type="'.($mycat['type'] == 0 ? 'public' : 'private').'" data-priority="'.intval($mycat['priority']).'" data-due="'.($has_due ? 1 : 0).'"'
+                              . ' data-search="'.hesk_htmlspecialchars(hesk_mb_strtolower('#'.$mycat['id'].' '.hesk_html_entity_decode($mycat['name']))).'"';
+                    ?>
+                    <tr <?php echo $table_row; ?> <?php echo $row_data; ?> data-category-id="<?php echo $mycat['id']; ?>" data-autoassign-enabled="<?php echo $mycat['autoassign'] ?>" data-autoassign-config="<?php echo hesk_stripslashes($mycat['autoassign_config']); ?>">
+                        <td><span class="ut-team__muted">#<?php echo $mycat['id']; ?></span></td>
                         <td>
-                            <span class="category-name"><?php echo $mycat['name']; ?></span>
+                            <span class="category-name ut-team__name"><?php echo $mycat['name']; ?></span>
                         </td>
-                        <td>
+                        <td class="nowrap">
                             <span class="priority<?php echo $mycat['priority']; ?>">
-                                <?php echo $priorities[$mycat['priority']]['text']; ?>
+                                <?php echo trim($priorities[$mycat['priority']]['text'], ' *'); ?>
                             </span>
                         </td>
                         <td>
@@ -183,12 +219,13 @@ if (!hesk_SESSION('error')) {
                             $tickets_url = 'show_tickets.php?category='.$mycat['id'].'&amp;s_all=1&amp;s_my=1&amp;s_ot=1&amp;s_un=1';
                             ?>
                             <a class="tooltip" data-ztt_vertical_offset="0" href="<?php echo $tickets_url; ?>" title="<?php echo $hesklang['list_tickets_cat']; ?>">
-                                <?php echo $all; ?>
-                                (<?php echo $width_all; ?>%)
+                                <b><?php echo $all; ?></b>
+                                <span class="ut-team__muted">(<?php echo $width_all; ?>%)</span>
                             </a>
+                            <span class="ut-cats__bar"><span style="width: <?php echo max($all ? 2 : 0, $width_all); ?>%"></span></span>
                         </td>
                         <td>
-                            <?php echo $mycat['type'] == 0 ? $hesklang['cat_public'] : $hesklang['cat_private']; ?>
+                            <span class="ut-team__badge <?php echo $mycat['type'] == 0 ? 'is-on' : 'is-off'; ?>"><?php echo $mycat['type'] == 0 ? $hesklang['ut_cat_public'] : $hesklang['ut_cat_private']; ?></span>
                         </td>
                         <?php if ($hesk_settings['autoassign']): ?>
                         <td class="assign">
@@ -232,12 +269,12 @@ if (!hesk_SESSION('error')) {
                             if ($num > 1) {
                                 if ($j == 1) {
                                     ?>
-                                    <a href="#" style="visibility: hidden">
+                                    <a href="#" class="ut-cats__move" style="visibility: hidden">
                                         <svg class="icon icon-chevron-up">
                                             <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-chevron-down"></use>
                                         </svg>
                                     </a>
-                                    <a class="tooltip" href="manage_categories.php?a=order&amp;catid=<?php echo $mycat['id']; ?>&amp;move=15&amp;token=<?php hesk_token_echo(); ?>"
+                                    <a class="tooltip ut-cats__move" href="manage_categories.php?a=order&amp;catid=<?php echo $mycat['id']; ?>&amp;move=15&amp;token=<?php hesk_token_echo(); ?>"
                                        title="<?php echo $hesklang['move_dn']; ?>">
                                         <svg class="icon icon-chevron-down">
                                             <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-chevron-down"></use>
@@ -247,13 +284,13 @@ if (!hesk_SESSION('error')) {
                                     echo'';
                                 } elseif ($j == $num) {
                                     ?>
-                                    <a class="tooltip" href="manage_categories.php?a=order&amp;catid=<?php echo $mycat['id']; ?>&amp;move=-15&amp;token=<?php hesk_token_echo(); ?>"
+                                    <a class="tooltip ut-cats__move" href="manage_categories.php?a=order&amp;catid=<?php echo $mycat['id']; ?>&amp;move=-15&amp;token=<?php hesk_token_echo(); ?>"
                                        title="<?php echo $hesklang['move_up']; ?>">
                                         <svg class="icon icon-chevron-up">
                                             <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-chevron-down"></use>
                                         </svg>
                                     </a>
-                                    <a href="#" style="visibility: hidden"
+                                    <a href="#" class="ut-cats__move" style="visibility: hidden"
                                        title="<?php echo $hesklang['move_dn']; ?>">
                                         <svg class="icon icon-chevron-down">
                                             <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-chevron-down"></use>
@@ -262,13 +299,13 @@ if (!hesk_SESSION('error')) {
                                     <?php
                                 } else {
                                     ?>
-                                    <a class="tooltip" href="manage_categories.php?a=order&amp;catid=<?php echo $mycat['id']; ?>&amp;move=-15&amp;token=<?php hesk_token_echo(); ?>"
+                                    <a class="tooltip ut-cats__move" href="manage_categories.php?a=order&amp;catid=<?php echo $mycat['id']; ?>&amp;move=-15&amp;token=<?php hesk_token_echo(); ?>"
                                        title="<?php echo $hesklang['move_up']; ?>">
                                         <svg class="icon icon-chevron-up">
                                             <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-chevron-down"></use>
                                         </svg>
                                     </a>
-                                    <a class="tooltip" href="manage_categories.php?a=order&amp;catid=<?php echo $mycat['id']; ?>&amp;move=15&amp;token=<?php hesk_token_echo(); ?>"
+                                    <a class="tooltip ut-cats__move" href="manage_categories.php?a=order&amp;catid=<?php echo $mycat['id']; ?>&amp;move=15&amp;token=<?php hesk_token_echo(); ?>"
                                        title="<?php echo $hesklang['move_dn']; ?>">
                                         <svg class="icon icon-chevron-down">
                                             <use xlink:href="<?php echo HESK_PATH; ?>img/sprite.svg#icon-chevron-down"></use>
@@ -314,9 +351,128 @@ if (!hesk_SESSION('error')) {
                 <?php } ?>
                 </tbody>
             </table>
+            <p class="ut-team__empty" id="utCatEmpty" hidden><?php echo $hesklang['ut_cat_empty']; ?></p>
         </div>
     </div>
+    <div class="ut-team__footer">
+        <span class="ut-team__range" id="utCatRange"></span>
+        <nav class="ut-team__pages" id="utCatPages" aria-label="<?php echo $hesklang['ut_team_pages']; ?>"></nav>
+    </div>
 </div>
+<script>
+(function () {
+    var PER_PAGE = 25;
+    var table = document.getElementById('default-table');
+    var rows = Array.prototype.slice.call(table.querySelectorAll('tbody tr[data-type]'));
+    var search = document.getElementById('utCatSearch');
+    var types = document.querySelectorAll('.ut-cats .ut-team__role');
+    var prioritySel = document.getElementById('utCatPriority');
+    var dueSel = document.getElementById('utCatDue');
+    var empty = document.getElementById('utCatEmpty');
+    var rangeEl = document.getElementById('utCatRange');
+    var pagesEl = document.getElementById('utCatPages');
+    var type = '';
+    var page = 1;
+
+    var count = { '': rows.length, 'public': 0, 'private': 0 };
+    rows.forEach(function (r) { count[r.dataset.type]++; });
+    types.forEach(function (b) { b.querySelector('span').textContent = count[b.dataset.type]; });
+    document.getElementById('utCatSummary').textContent = <?php echo json_encode($hesklang['ut_cat_summary']); ?>
+        .replace('%1', count['']).replace('%2', count['public']).replace('%3', count['private']);
+
+    function filtered() {
+        return search.value.trim() !== '' || type !== '' || prioritySel.value !== '' || dueSel.value !== '';
+    }
+
+    function matching() {
+        var term = search.value.trim().toLowerCase();
+        return rows.filter(function (r) {
+            return (!type || r.dataset.type === type)
+                && (prioritySel.value === '' || r.dataset.priority === prioritySel.value)
+                && (dueSel.value === '' || r.dataset.due === dueSel.value)
+                && (!term || r.dataset.search.indexOf(term) !== -1);
+        });
+    }
+
+    function pageButton(p, label, current, disabled) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.innerHTML = label;
+        if (current) {
+            b.className = 'is-current';
+            b.setAttribute('aria-current', 'page');
+        }
+        if (disabled) {
+            b.disabled = true;
+        } else {
+            b.addEventListener('click', function () {
+                page = p;
+                render();
+                document.querySelector('.ut-cats .ut-team__toolbar').scrollIntoView({ block: 'start', behavior: 'smooth' });
+            });
+        }
+        return b;
+    }
+
+    function render() {
+        var list = matching();
+        var pages = Math.max(1, Math.ceil(list.length / PER_PAGE));
+        page = Math.min(Math.max(1, page), pages);
+        var first = (page - 1) * PER_PAGE;
+        var visible = list.slice(first, first + PER_PAGE);
+
+        rows.forEach(function (r) { r.hidden = visible.indexOf(r) === -1; });
+        empty.hidden = list.length > 0;
+        // Moving up/down only makes sense in the full, unfiltered order
+        table.classList.toggle('is-filtered', filtered());
+
+        rangeEl.textContent = list.length
+            ? <?php echo json_encode($hesklang['ut_cat_range']); ?>.replace('%1', first + 1).replace('%2', first + visible.length).replace('%3', list.length)
+            : '';
+
+        pagesEl.innerHTML = '';
+        if (pages > 1) {
+            pagesEl.appendChild(pageButton(page - 1, '&lsaquo;', false, page === 1));
+            var from = Math.max(1, page - 2), to = Math.min(pages, page + 2);
+            // "…" only hides two or more pages; a single missing page is shown instead
+            if (from === 3) from = 2;
+            if (to === pages - 2) to = pages - 1;
+            if (from > 1) {
+                pagesEl.appendChild(pageButton(1, '1', false, false));
+                if (from > 2) pagesEl.appendChild(Object.assign(document.createElement('span'), { textContent: '…' }));
+            }
+            for (var p = from; p <= to; p++) {
+                pagesEl.appendChild(pageButton(p, String(p), p === page, false));
+            }
+            if (to < pages) {
+                if (to < pages - 1) pagesEl.appendChild(Object.assign(document.createElement('span'), { textContent: '…' }));
+                pagesEl.appendChild(pageButton(pages, String(pages), false, false));
+            }
+            pagesEl.appendChild(pageButton(page + 1, '&rsaquo;', false, page === pages));
+        }
+    }
+
+    search.addEventListener('input', function () { page = 1; render(); });
+    prioritySel.addEventListener('change', function () { page = 1; render(); });
+    dueSel.addEventListener('change', function () { page = 1; render(); });
+    types.forEach(function (b) {
+        b.addEventListener('click', function () {
+            types.forEach(function (x) { x.classList.remove('is-active'); });
+            b.classList.add('is-active');
+            type = b.dataset.type;
+            page = 1;
+            render();
+        });
+    });
+
+    // After saving or moving a category, open the page where it is highlighted
+    var highlighted = table.querySelector('tbody tr.ticket-new');
+    if (highlighted) {
+        page = Math.floor(rows.indexOf(highlighted) / PER_PAGE) + 1;
+    }
+    render();
+})();
+</script>
 <div class="notification-flash green" data-type="link-generate-message">
     <i class="close">
         <svg class="icon icon-close">

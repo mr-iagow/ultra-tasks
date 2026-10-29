@@ -1,0 +1,109 @@
+/* UltraTasks - categories page (manage_categories.php).
+   Header, search, filters, table and pages reuse the team page styles (css/ut_team.css, .ut-team__*). */
+
+.ut-cats.main__content.categories {
+    padding: 20px 28px 50px 20px;
+}
+
+/* The base theme reserves 200px on the right for an old floating button */
+.ut-cats.main__content.categories .categories__head,
+.ut-cats.main__content.categories .table-wrap {
+    margin-right: 0;
+}
+
+.ut-cats.main__content.categories .categories__head h2 {
+    padding-left: 0;
+}
+
+.ut-cats.main__content.categories .categories__head .btn {
+    min-width: 0;
+    width: auto;
+    height: 40px;
+    padding: 0 18px;
+}
+
+/* Priority and due date filters next to the type buttons */
+.ut-cats__filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.ut-cats__select {
+    height: 34px;
+    padding: 0 30px 0 12px;
+    border: 1px solid var(--ut-line);
+    border-radius: 17px;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ut-text);
+    cursor: pointer;
+}
+
+.ut-cats__select:focus {
+    border-color: var(--ut-purple);
+    outline: none;
+}
+
+/* Share of tickets */
+.ut-cats__bar {
+    display: block;
+    width: 90px;
+    height: 4px;
+    margin-top: 5px;
+    border-radius: 2px;
+    background: #eef0f4;
+    overflow: hidden;
+}
+
+.ut-cats__bar span {
+    display: block;
+    height: 100%;
+    background: var(--ut-purple);
+}
+
+.ut-cats #default-table tbody td {
+    vertical-align: middle !important;
+}
+
+.ut-cats #default-table td a.tooltip:not(.delete) {
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ut-cats #default-table td a.tooltip b {
+    color: var(--ut-purple);
+}
+
+.ut-cats #default-table td a.tooltip:hover b {
+    text-decoration: underline;
+}
+
+/* Actions */
+.ut-cats #default-table td.generate {
+    text-align: right;
+}
+
+.ut-cats #default-table td.generate a {
+    display: inline-flex;
+    margin-left: 6px;
+}
+
+.ut-cats #default-table td.generate .icon {
+    fill: var(--ut-muted);
+}
+
+.ut-cats #default-table td.generate a:hover .icon {
+    fill: var(--ut-purple);
+}
+
+.ut-cats #default-table td.generate a.delete:hover .icon {
+    fill: var(--ut-critical);
+}
+
+/* Reordering only in the full, unfiltered list */
+.ut-cats #default-table.is-filtered .ut-cats__move {
+    display: none !important;
+}

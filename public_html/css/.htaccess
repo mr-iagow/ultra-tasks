@@ -1,0 +1,9 @@
+# Let browsers keep the stylesheets that are linked with a version in the URL
+# (?filemtime or ?hesk_version), so pages stop re-checking them on every click.
+# A new version changes the URL, so updates still show up right away.
+# zebra_tooltips.css is linked without a version and keeps the default behaviour.
+<IfModule mod_headers.c>
+    <FilesMatch "^(app(\.min)?|ticket_[a-z_]+|ut_[a-z_]+|dropzone\.min|prism)\.css$">
+        Header set Cache-Control "public, max-age=2592000"
+    </FilesMatch>
+</IfModule>
