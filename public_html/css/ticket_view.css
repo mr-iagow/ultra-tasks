@@ -91,11 +91,12 @@
     color: var(--ut-text);
 }
 
+/* Aligned columns: categories with many custom fields stay readable */
 .ut-contact {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-start;
-    gap: 10px 32px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    align-items: start;
+    gap: 14px 24px;
     margin-top: 16px;
     padding: 12px 16px;
     background: #fafbfc;
@@ -133,6 +134,49 @@
 
 .ut-contact__item span:last-child {
     color: var(--ut-text);
+}
+
+.ut-contact__item {
+    min-width: 0;
+}
+
+.ut-contact__item > span:last-child {
+    display: block;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.ut-contact__item.is-wide {
+    grid-column: span 2;
+}
+
+/* Contact name: usually long, takes two columns and wraps instead of overlapping */
+.ut-ticket .ut-contact > .block--head {
+    grid-column: span 2;
+    min-width: 0;
+}
+
+.ut-ticket .ut-contact .block--head .contact .dropdown label {
+    white-space: normal;
+    text-align: left;
+}
+
+.ut-contact + .block--description,
+.ut-contact + .block--description > p:first-child {
+    margin-top: 12px !important;
+}
+
+.ut-contact__empty {
+    font-style: normal;
+    font-weight: 400;
+    color: #c2c7d0;
+}
+
+@media screen and (max-width: 700px) {
+    .ut-contact__item.is-wide {
+        grid-column: auto;
+    }
 }
 
 /* ---------- Message as a sheet ---------- */

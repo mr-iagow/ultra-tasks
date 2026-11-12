@@ -1046,6 +1046,10 @@ $options = array(
                 if ($v['use'] && $v['place']==0 && (strlen($ticket[$k]) || hesk_is_custom_field_in_category($k, $ticket['category'])) )
                 {
 
+                    // Long values (links, long text) take two columns of the grid
+                    $plain_value = trim(strip_tags($ticket[$k]));
+                    $item_class = (hesk_mb_strlen($plain_value) > 40 || stripos($plain_value, 'http') !== false) ? ' is-wide' : '';
+
                     switch ($v['type'])
                     {
                         case 'email':
@@ -1054,9 +1058,9 @@ $options = array(
                     }
 
                     echo '
-					<div class="ut-contact__item">
+					<div class="ut-contact__item'.$item_class.'">
                         <span class="custom-field-title">'.$v['name:'].'</span>
-                        <span>'.$ticket[$k].'</span>
+                        <span>'.($plain_value === '' ? '<i class="ut-contact__empty">&mdash;</i>' : $ticket[$k]).'</span>
 					</div>';
                 }
             }
